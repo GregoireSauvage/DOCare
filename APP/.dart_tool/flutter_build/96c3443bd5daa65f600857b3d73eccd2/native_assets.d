@@ -1,0 +1,1 @@
+ C:\\Users\\hugol\\Desktop\\cours_ece\\PFE\\DOCare\\.dart_tool\\flutter_build\\96c3443bd5daa65f600857b3d73eccd2\\native_assets.yaml: 
