@@ -17,6 +17,7 @@ import 'dart:ui_web' as ui; // Pour afficher un pdf dans un dialogue
 import 'package:docare/footer_web.dart'; // Pour afficher le footer
 import 'package:docare/context_menu.dart'; // Pour afficher le menu contextuel (clic droit)
 
+
 class DocumentInterface extends StatefulWidget {
   @override
   _DocumentInterfaceState createState() => _DocumentInterfaceState();
@@ -172,6 +173,7 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
                 );
                 folderName = ""; // Clear the folder name
                 setState(() {
+                  isElement = false;
                   filteredEntity.clear(); // Clear the list of documents
                   // Add folders and files from the selected folder to filteredEntity
                   filteredEntity.addAll(
@@ -293,6 +295,7 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
       });
     } else {
       setState(() {
+        isElement = false;
         filteredEntity = entity
             .where(
                 (doc) => doc.name.toLowerCase().contains(query.toLowerCase()))
@@ -440,6 +443,7 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
   // Callback function to update UI
   void updateUI() {
     setState(() {
+      isElement = false;
       filteredEntity.clear();
       filteredEntity.addAll(Provider.of<User>(context, listen: false)
           .folderList[indexFolder]
@@ -450,15 +454,22 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
     });
   }
 
+  bool isElement = false; // True if the context menu is opened on an element (folder or document) - False if the context menu is opened on the background
+
   @override
   Widget build(BuildContext context) {
     String path = getFolderPath();
+
+  html.window.addEventListener('contextmenu', (html.Event event) {
+    event.preventDefault();
+  });
 
     return Consumer<MenuActions>(builder: (context, menuActions, child) {
       return Scaffold(
         body: CustomContextMenuArea(
           updateCallback: updateUI,
           indexFolder: indexFolder,
+          isElement: isElement,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start, // Alignement à gauche
             children: <Widget>[
@@ -511,6 +522,7 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
                         folder.parentId); // Change the current folder index
                     if (parentdIndexFolder < 0) parentdIndexFolder = 0;
                     setState(() {
+                      isElement = false;
                       indexFolder = parentdIndexFolder;
                       filteredEntity.clear(); // Clear the list of documents
                       searchController.clear(); // Clear the search bar
@@ -559,66 +571,124 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
                   itemBuilder: (context, index) {
                     return Card(
                       clipBehavior: Clip.antiAlias,
-                      child: InkWell(
-                        // Code pour visualiser le document
-                        onTap: () {
-                          if (filteredEntity[index].type == true) {
-                            // Si c'est un dossier
+                      child: Builder(  // Use Builder to get the correct context for the grid item
+                        builder: (itemContext) => InkWell(
+                          // Code pour visualiser le document
+                          onTap: () {
+                            if (filteredEntity[index].type == true) {
+                              // Si c'est un dossier
 
-                            Folder folder = filteredEntity[index]
-                                as Folder; // Cast en Folder
-                            setState(() {
-                              indexFolder = FindFolderIndexWithId(
-                                  folder.id); // Change the current folder index
-                              filteredEntity
-                                  .clear(); // Clear the list of documents
-                              searchController.clear(); // Clear the search bar
-                              // Add folders and files from the selected folder to filteredEntity
-                              filteredEntity.addAll(
-                                  Provider.of<User>(context, listen: false)
-                                      .folderList[indexFolder]
-                                      .folders);
-                              filteredEntity.addAll(
-                                  Provider.of<User>(context, listen: false)
-                                      .folderList[indexFolder]
-                                      .files);
-                            });
-                          } else {
-                            // Si c'est un document
-                            Document document = filteredEntity[index]
-                                as Document; // Cast en Document
-                            _openFile(
-                                document); // Appelle la méthode pour afficher le document
-                          }
-                        },
-                        child: GridTile(
-                            footer: Container(
-                              padding: const EdgeInsets.all(4.0),
-                              color: Colors.blue.withOpacity(0.8),
-                              child: Text(
-                                filteredEntity[index].name,
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(color: Colors.white),
-                              ),
+                              Folder folder = filteredEntity[index]
+                                  as Folder; // Cast en Folder
+                              setState(() {
+                                isElement = false;
+                                indexFolder = FindFolderIndexWithId(
+                                    folder.id); // Change the current folder index
+                                filteredEntity
+                                    .clear(); // Clear the list of documents
+                                searchController.clear(); // Clear the search bar
+                                // Add folders and files from the selected folder to filteredEntity
+                                filteredEntity.addAll(
+                                    Provider.of<User>(context, listen: false)
+                                        .folderList[indexFolder]
+                                        .folders);
+                                filteredEntity.addAll(
+                                    Provider.of<User>(context, listen: false)
+                                        .folderList[indexFolder]
+                                        .files);
+                              });
+                            } else {
+                              // Si c'est un document
+                              Document document = filteredEntity[index]
+                                  as Document; // Cast en Document
+                              _openFile(
+                                  document); // Appelle la méthode pour afficher le document
+                            }
+                          },
+                          onSecondaryTap: () {
+                            isElement = true;
+                            final RenderBox itemBox = itemContext.findRenderObject() as RenderBox; 
+                          final Offset position = itemBox.localToGlobal(Offset.zero);
+                          final Size size = itemBox.size; // gets the size of the element
+
+                          // Calculate the bottom left position of the element
+                          final Offset bottomLeft = position + Offset(0, size.height);
+
+                          showMenu(
+                            context: context,
+                            position: RelativeRect.fromLTRB(
+                              bottomLeft.dx, // Left position
+                              bottomLeft.dy, // Top position, which is actually the bottom of the element
+                              bottomLeft.dx, // Right position
+                              0, // Bottom position
                             ),
-                            child: filteredEntity[index] is Document
-                                ? (filteredEntity[index] as Document)
-                                            .fileType ==
-                                        'img'
-                                    ? Image.asset(
-                                        (filteredEntity[index] as Document)
-                                            .path, // Display the image for documents
-                                        fit: BoxFit.cover,
-                                      )
-                                    : Image.asset(
-                                        'assets/images/pdf_icon.jpeg',
-                                        fit: BoxFit.cover,
-                                      )
-                                : Image.asset(
-                                    'assets/images/folder.png', // Folder icon for folders
-                                    fit: BoxFit.cover,
-                                  )),
-                      ),
+                            items: [
+                              const PopupMenuItem<String>(
+                                value: 'rename',
+                                child: Text('Renommer'),
+                              ),
+                              const PopupMenuItem<String>(
+                                value: 'delete',
+                                child: Text('Supprimer'),
+                              ),
+                            ],
+                          ).then((value) {
+                            if (value == 'rename') {
+                              if(filteredEntity[index] is Document) {
+                                Document document = filteredEntity[index] as Document; // Cast en Document
+                                document.showRenameDocumentDialog(context); // Affiche la boîte de dialogue pour renommer le document
+                              }
+                              else {
+                                Folder folder = filteredEntity[index] as Folder; // Cast en Folder
+                                folder.showRenameFolderDialog(context); // Affiche la boîte de dialogue pour renommer le dossier
+                              }
+                              setState(() {
+                                isElement = false;
+                                filteredEntity.clear(); // Clear the list of documents
+                                // Add folders and files from the selected folder to filteredEntity
+                                filteredEntity.addAll(
+                                    Provider.of<User>(context, listen: false)
+                                        .folderList[indexFolder]
+                                        .folders);
+                                filteredEntity.addAll(
+                                    Provider.of<User>(context, listen: false)
+                                        .folderList[indexFolder]
+                                        .files);
+                              });
+                            } else if (value == 'delete') {
+                              // Code for deleting
+                            }
+                          });
+                          },
+                          child: GridTile(
+                              footer: Container(
+                                padding: const EdgeInsets.all(4.0),
+                                color: Colors.blue.withOpacity(0.8),
+                                child: Text(
+                                  filteredEntity[index].name,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(color: Colors.white),
+                                ),
+                              ),
+                              child: filteredEntity[index] is Document
+                                  ? (filteredEntity[index] as Document)
+                                              .fileType ==
+                                          'img'
+                                      ? Image.asset(
+                                          (filteredEntity[index] as Document)
+                                              .path, // Display the image for documents
+                                          fit: BoxFit.cover,
+                                        )
+                                      : Image.asset(
+                                          'assets/images/pdf_icon.jpeg',
+                                          fit: BoxFit.cover,
+                                        )
+                                  : Image.asset(
+                                      'assets/images/folder.png', // Folder icon for folders
+                                      fit: BoxFit.cover,
+                                    )),
+                        ),
+                      )
                     );
                   },
                 ),

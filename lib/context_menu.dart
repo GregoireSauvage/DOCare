@@ -65,18 +65,20 @@ class CustomContextMenuArea extends StatelessWidget {
   final Widget child;
   final VoidCallback updateCallback;
   final int indexFolder;
-  CustomContextMenuArea({required this.child, required this.updateCallback, required this.indexFolder});
+  final bool isElement;
+  CustomContextMenuArea({required this.child, required this.updateCallback, required this.indexFolder, required this.isElement});
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onSecondaryTapUp: (details) {
-        void contextMenuListener(html.Event event) {
+    void contextMenuListener(html.Event event) {
           event.preventDefault();
           html.window.removeEventListener('contextmenu', contextMenuListener);
         }
 
-        html.window.addEventListener('contextmenu', contextMenuListener);
+        html.window.addEventListener('contextmenu', contextMenuListener); // Listen for context menu events
+
+    return GestureDetector(
+      onSecondaryTapUp: (details) {
 
         final RenderBox? overlay = Overlay.of(context).context.findRenderObject() as RenderBox?;
         if (overlay != null) {
@@ -88,8 +90,9 @@ class CustomContextMenuArea extends StatelessWidget {
             Offset.zero & overlay.size,
           );
 
-          if(details.globalPosition.dy > 300) // Si le clic est dans la zone du dossier
+          if(isElement == true) // Si le clic est dans la zone du dossier/document
           {
+            print("Clic dans la zone du dossier/document");
             showMenu(
               context: context,
               position: position,
@@ -115,6 +118,7 @@ class CustomContextMenuArea extends StatelessWidget {
             });
           }
           else {
+            print("Clic dans la zone vide");
             showMenu(
               context: context,
               position: position,
@@ -137,7 +141,7 @@ class CustomContextMenuArea extends StatelessWidget {
             ).then((value) {
             });
           }
-          
+          //html.window.removeEventListener('contextmenu', contextMenuListener);
         }
       },
       child: child,

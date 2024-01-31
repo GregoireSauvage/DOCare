@@ -334,9 +334,10 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
     return path;
   }
 
+
   @override
   Widget build(BuildContext context) {
-    
+
     String path = getFolderPath();
     return Scaffold(
       body: Column(
@@ -451,7 +452,7 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
                         }
                       },
                       onLongPress: () { // Lorsque l'utilisateur appuie longuement sur un document/dossier
-                        final RenderBox itemBox = itemContext.findRenderObject() as RenderBox;
+                        final RenderBox itemBox = itemContext.findRenderObject() as RenderBox; 
                         final Offset position = itemBox.localToGlobal(Offset.zero);
                         final Size size = itemBox.size; // gets the size of the element
 
