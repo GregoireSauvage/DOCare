@@ -1,1 +1,0 @@
- D:\\projet\\DOCare\\PFE\\.dart_tool\\flutter_build\\d2b16f936646745b969164802dc07633\\native_assets.yaml: 

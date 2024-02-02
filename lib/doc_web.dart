@@ -172,19 +172,7 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
                   sharedWith: [],
                 );
                 folderName = ""; // Clear the folder name
-                setState(() {
-                  isElement = false;
-                  filteredEntity.clear(); // Clear the list of documents
-                  // Add folders and files from the selected folder to filteredEntity
-                  filteredEntity.addAll(
-                      Provider.of<User>(context, listen: false)
-                          .folderList[indexFolder]
-                          .folders);
-                  filteredEntity.addAll(
-                      Provider.of<User>(context, listen: false)
-                          .folderList[indexFolder]
-                          .files);
-                });
+                
                 Navigator.of(context).pop(); // Close the dialog
               },
             ),
@@ -205,7 +193,7 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
             content: Image.asset(
                 document.path), // Use the path from the document data
             actions: <Widget>[
-              Text(document.title),
+              Text(document.name),
               SizedBox(
                   width: MediaQuery.of(context).size.width /
                       15), // Ajuster la taille du SizedBox si nécessaire
@@ -350,9 +338,35 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
                   // Handle the action when an item is selected
                   if (value == 'new_folder') {
                     showCreateFolderDialog(context);
+                    setState(() {
+                      isElement = false;
+                      filteredEntity.clear(); // Clear the list of documents
+                      // Add folders and files from the selected folder to filteredEntity
+                      filteredEntity.addAll(
+                          Provider.of<User>(context, listen: false)
+                              .folderList[indexFolder]
+                              .folders);
+                      filteredEntity.addAll(
+                          Provider.of<User>(context, listen: false)
+                              .folderList[indexFolder]
+                              .files);
+                    });
                   } else if (value == 'new_document') {
                     newDocument(context); // Appelle la méthode pour créer un nouveau document
-                  }
+                    setState(() {
+                      isElement = false;
+                      filteredEntity.clear(); // Clear the list of documents
+                      // Add folders and files from the selected folder to filteredEntity
+                      filteredEntity.addAll(
+                          Provider.of<User>(context, listen: false)
+                              .folderList[indexFolder]
+                              .folders);
+                      filteredEntity.addAll(
+                          Provider.of<User>(context, listen: false)
+                              .folderList[indexFolder]
+                              .files);
+                    });
+                      }
                 },
                 itemBuilder: (BuildContext context) {
                   return <PopupMenuEntry<String>>[
@@ -636,28 +650,32 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
                             if (value == 'rename') {
                               if(filteredEntity[index] is Document) {
                                 Document document = filteredEntity[index] as Document; // Cast en Document
-                                document.showRenameDocumentDialog(context); // Affiche la boîte de dialogue pour renommer le document
+                                document.showRenameDocumentDialog(context, () { // Affiche la boîte de dialogue pour renommer le document
+                                  setState(() { // Met à jour l'interface
+                                    isElement = false; 
+                                    filteredEntity.clear(); // Clear the list of documents
+                                    // Add folders and files from the selected folder to filteredEntity
+                                    filteredEntity.addAll(
+                                        Provider.of<User>(context, listen: false)
+                                            .folderList[indexFolder]
+                                            .folders);
+                                    filteredEntity.addAll(
+                                        Provider.of<User>(context, listen: false)
+                                            .folderList[indexFolder]
+                                            .files);
+                                  });
+                                }); 
+                                
                               }
                               else {
                                 Folder folder = filteredEntity[index] as Folder; // Cast en Folder
                                 folder.showRenameFolderDialog(context); // Affiche la boîte de dialogue pour renommer le dossier
                               }
-                              setState(() {
-                                isElement = false;
-                                filteredEntity.clear(); // Clear the list of documents
-                                // Add folders and files from the selected folder to filteredEntity
-                                filteredEntity.addAll(
-                                    Provider.of<User>(context, listen: false)
-                                        .folderList[indexFolder]
-                                        .folders);
-                                filteredEntity.addAll(
-                                    Provider.of<User>(context, listen: false)
-                                        .folderList[indexFolder]
-                                        .files);
-                              });
+                              
                             } else if (value == 'delete') {
                               // Code for deleting
                             }
+                            
                           });
                           },
                           child: GridTile(

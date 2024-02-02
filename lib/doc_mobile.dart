@@ -481,7 +481,20 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
                           if (value == 'rename') {
                             if(filteredEntity[index] is Document) {
                               Document document = filteredEntity[index] as Document; // Cast en Document
-                              document.showRenameDocumentDialog(context); // Affiche la boîte de dialogue pour renommer le document
+                              document.showRenameDocumentDialog(context, () { // Affiche la boîte de dialogue pour renommer le document
+                                  setState(() { // Met à jour l'interface
+                                    filteredEntity.clear(); // Clear the list of documents
+                                    // Add folders and files from the selected folder to filteredEntity
+                                    filteredEntity.addAll(
+                                        Provider.of<User>(context, listen: false)
+                                            .folderList[indexFolder]
+                                            .folders);
+                                    filteredEntity.addAll(
+                                        Provider.of<User>(context, listen: false)
+                                            .folderList[indexFolder]
+                                            .files);
+                                  });
+                                }); 
                             }
                             else {
                               Folder folder = filteredEntity[index] as Folder; // Cast en Folder

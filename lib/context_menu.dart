@@ -92,37 +92,18 @@ class CustomContextMenuArea extends StatelessWidget {
 
           if(isElement == true) // Si le clic est dans la zone du dossier/document
           {
-            print("Clic dans la zone du dossier/document");
-            showMenu(
-              context: context,
-              position: position,
-              items: [
-              PopupMenuItem(
-                value: 'rename',
-                child: const Text('Renommer'),
-                onTap: () {
-                  // Perform the action for creating a new folder
-                  print("Renommer");
-                },
-                
-              ),
-              PopupMenuItem(
-                value: 'delete',
-                child: const Text('Supprimer'),
-                onTap: () {
-
-                },
-              ),
-            ],
-            ).then((value) {
-            });
+            
           }
           else {
-            print("Clic dans la zone vide");
             showMenu(
               context: context,
               position: position,
               items: [
+                PopupMenuItem(
+                value: 'new_document',
+                child: const Text('Nouveau Document'),
+                onTap: () => Provider.of<MenuActions>(context, listen: false).newDocument(),
+              ),
               PopupMenuItem(
                 value: 'new_folder',
                 child: const Text('Nouveau dossier'),
@@ -131,11 +112,6 @@ class CustomContextMenuArea extends StatelessWidget {
                   Provider.of<MenuActions>(context, listen: false).newFolder(context, indexFolder, updateCallback); // Appel de la fonction newFolder
                 },
                 
-              ),
-              PopupMenuItem(
-                value: 'new_document',
-                child: const Text('Nouveau Document'),
-                onTap: () => Provider.of<MenuActions>(context, listen: false).newDocument(),
               ),
             ],
             ).then((value) {

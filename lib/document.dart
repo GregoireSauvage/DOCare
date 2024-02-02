@@ -41,13 +41,13 @@ class Document extends FileSystemEntity {
   }
 
   // Method to show dialog to rename a document
-  void showRenameDocumentDialog(BuildContext context) {
+  Future<void> showRenameDocumentDialog(BuildContext context, VoidCallback onRenameSuccess) async {
     final TextEditingController documentNameController = TextEditingController();
-    showDialog(
+    await showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Rennomer le document'),
+          title: const Text('Renommer le document'),
           content: TextField(
             controller: documentNameController,
             decoration: InputDecoration(
@@ -69,7 +69,8 @@ class Document extends FileSystemEntity {
                 if (docName.isEmpty) docName = name; // If the document name is empty, set it to the previous name
                 
                 rename(docName); // Rename the document
-                docName = ""; // Clear the doc name
+                documentNameController.clear(); // Clear the doc name
+                onRenameSuccess(); // Call the callback function after document rename
                 Navigator.of(context).pop(); // Close the dialog
               },
             ),
