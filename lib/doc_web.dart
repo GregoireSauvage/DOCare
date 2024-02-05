@@ -575,7 +575,7 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
                   padding: const EdgeInsets.all(4.0),
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: (MediaQuery.of(context).size.width / 120)
-                        .floor(), // le nobre d'éléments par ligne (adapté selon la taille de l'écran)
+                        .floor(), // le nombre d'éléments par ligne (adapté selon la taille de l'écran)
                     crossAxisSpacing:
                         10.0, // Espace horizontal entre les éléments
                     mainAxisSpacing: 10.0, // Espace vertical entre les éléments

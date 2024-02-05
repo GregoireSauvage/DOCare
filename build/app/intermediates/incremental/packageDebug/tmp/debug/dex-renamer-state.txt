@@ -1,4 +1,4 @@
-#Thu Feb 01 14:46:38 CET 2024
+#Fri Feb 02 19:23:20 CET 2024
 base.0=D\:\\projet\\DOCare\\DOCare\\build\\app\\intermediates\\dex\\debug\\mergeDexDebug\\classes.dex
 path.0=classes.dex
 renamed.0=classes.dex

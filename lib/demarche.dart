@@ -1,7 +1,4 @@
-import 'dart:html';
-import 'package:docare/user.dart';
 import 'package:docare/document.dart';
-import 'package:provider/provider.dart';
 
 class Demarche {
 

@@ -5,7 +5,8 @@ import 'package:docare/document.dart';
 import 'package:docare/doc_mobile.dart' // par defaut charge la version mobile
     if (dart.library.html) 'package:docare/doc_web.dart'; // sinon charge la version web
 
-import 'package:docare/demarche_web.dart';
+import 'package:docare/demarche_mobile.dart'
+    if (dart.library.html) 'package:docare/demarche_web.dart';
 
 import 'package:provider/provider.dart'; // Pour utiliser le provider
 import 'package:docare/user.dart'; // Pour utiliser la classe User
