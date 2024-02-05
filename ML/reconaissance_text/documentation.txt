@@ -1,0 +1,2 @@
+https://www.kaggle.com/code/naim99/ocr-text-recognition-ocr-space-api-tesseract
+https://www.kaggle.com/code/mpwolke/keras-ocr-text-recognition
