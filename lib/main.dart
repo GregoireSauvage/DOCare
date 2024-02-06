@@ -43,6 +43,7 @@ void main() {
     title: "Carte d'identité",
     fileType: 'img',
     path: 'assets/documents/CNI_example.png',
+    tags: ["document d'identité"],
     creationDate: DateTime.now(),
     ownerId: currentUser.userId, // id de l'utilisateur propriétaire du document
     folder: currentUser.folderList[0], // dossier racine
@@ -52,6 +53,7 @@ void main() {
     title: "annale d'IAM",
     fileType: 'pdf',
     path: 'assets/documents/iam_DS-3.pdf',
+    tags: ["personnel"],
     creationDate: DateTime.now(),
     ownerId: currentUser.userId, // id de l'utilisateur propriétaire du document
     folder: currentUser.folderList[0], // dossier racine

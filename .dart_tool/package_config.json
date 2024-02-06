@@ -32,6 +32,12 @@
       "languageVersion": "2.18"
     },
     {
+      "name": "csslib",
+      "rootUri": "file:///C:/Users/gregs/AppData/Local/Pub/Cache/hosted/pub.dev/csslib-1.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.19"
+    },
+    {
       "name": "cunning_document_scanner",
       "rootUri": "file:///C:/Users/gregs/AppData/Local/Pub/Cache/hosted/pub.dev/cunning_document_scanner-1.1.4",
       "packageUri": "lib/",
@@ -96,6 +102,24 @@
       "rootUri": "file:///D:/projet/flutter/packages/flutter_web_plugins",
       "packageUri": "lib/",
       "languageVersion": "3.2"
+    },
+    {
+      "name": "html",
+      "rootUri": "file:///C:/Users/gregs/AppData/Local/Pub/Cache/hosted/pub.dev/html-0.15.4",
+      "packageUri": "lib/",
+      "languageVersion": "2.19"
+    },
+    {
+      "name": "http",
+      "rootUri": "file:///C:/Users/gregs/AppData/Local/Pub/Cache/hosted/pub.dev/http-1.2.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
+      "name": "http_parser",
+      "rootUri": "file:///C:/Users/gregs/AppData/Local/Pub/Cache/hosted/pub.dev/http_parser-4.0.2",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
     },
     {
       "name": "lints",
@@ -272,6 +296,12 @@
       "languageVersion": "3.0"
     },
     {
+      "name": "typed_data",
+      "rootUri": "file:///C:/Users/gregs/AppData/Local/Pub/Cache/hosted/pub.dev/typed_data-1.3.2",
+      "packageUri": "lib/",
+      "languageVersion": "2.17"
+    },
+    {
       "name": "url_launcher",
       "rootUri": "file:///C:/Users/gregs/AppData/Local/Pub/Cache/hosted/pub.dev/url_launcher-6.2.4",
       "packageUri": "lib/",
@@ -350,7 +380,7 @@
       "languageVersion": "3.2"
     }
   ],
-  "generated": "2024-02-06T14:02:52.075020Z",
+  "generated": "2024-02-06T15:09:18.923281Z",
   "generator": "pub",
   "generatorVersion": "3.2.3"
 }

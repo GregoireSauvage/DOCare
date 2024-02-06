@@ -9,6 +9,7 @@ class Document extends FileSystemEntity {
   String title;
   String fileType;
   String path;  // chemin du fichier
+  List<String> tags; // liste des tags
   DateTime creationDate;
   int ownerId; // id de l'utilisateur propriétaire du document
   Folder folder; // id du dossier dans lequel se trouve le document
@@ -18,6 +19,7 @@ class Document extends FileSystemEntity {
     required this.title,
     required this.fileType,
     required this.path,
+    required this.tags,
     required this.creationDate,
     required this.ownerId,
     required this.folder,
@@ -31,6 +33,7 @@ class Document extends FileSystemEntity {
   String getTitle() {return title;}
   String getFileType() {return fileType;}
   String getPath() {return path;}
+  List<String> getTags() {return tags;}
   DateTime getCreationDate() {return creationDate;}
   int getOwnerId() {return ownerId;}
   Folder getFolderId() {return folder;}
@@ -38,6 +41,19 @@ class Document extends FileSystemEntity {
   // rename
   void rename(String newName) {
     name = newName;
+  }
+
+  // add a tag
+  void addTag(String tag) {
+    tags.add(tag);
+  }
+
+  // modify tags
+  void modifyTag(List<String> newTags) {
+    tags.clear();
+    for (String tag in newTags){
+      tags.add(tag);
+    }
   }
 
   // Method to show dialog to rename a document
