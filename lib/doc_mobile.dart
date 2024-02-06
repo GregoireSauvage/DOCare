@@ -15,6 +15,8 @@ import 'package:open_filex/open_filex.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
+import 'package:cunning_document_scanner/cunning_document_scanner.dart'; // Pour scanner un document
+import 'package:docare/scanner_UI_mobile.dart'; // Pour scanner un document
 
 class DocumentInterface extends StatefulWidget {
   @override
@@ -212,19 +214,34 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
             child: ConstrainedBox(
               constraints: BoxConstraints.tightFor(width: buttonWidth),
               child: PopupMenuButton<String>(
-                onSelected: (String value) {
-                  // Handle the action when an item is selected
-                  if (value == 'new_folder') {
-                    showCreateFolderDialog(context); // Appelle la méthode pour créer un nouveau dossier
-                  } else if (value == 'new_document') {
+                onSelected: (String value) async {
+                  if(value == 'scan_document') {
+                    List<String> pictures = await CunningDocumentScanner.getPictures(true) ?? [];
+                    if (pictures.isNotEmpty && mounted) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => DocumentScannerUI(pictures: pictures),
+                        ),
+                      );
+                    }
+                    
+                  } else if (value == 'import_document') {
                     newDocument(); // Appelle la méthode pour créer un nouveau document
-                  }
+
+                  } else if (value == 'new_folder') {
+                    showCreateFolderDialog(context); // Appelle la méthode pour créer un nouveau dossier
+                  } 
                 },
                 itemBuilder: (BuildContext context) {
                   return <PopupMenuEntry<String>>[
                     const PopupMenuItem<String>(
-                      value: 'new_document',
-                      child: Text('Nouveau Document'),
+                      value: 'scan_document',
+                      child: Text('Scanner un document'),
+                    ),
+                    const PopupMenuItem<String>(
+                      value: 'import_document',
+                      child: Text('Import un document'),
                     ),
                     const PopupMenuItem<String>(
                       value: 'new_folder',
@@ -268,6 +285,7 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
   List<FileSystemEntity> filteredEntity = []; // Liste des dossiers/documents filtrés
   int idFolder = 0; // Index du dossier actuel - 0 = /home (ou root)
   int indexFolder = 0;
+  List<String> _pictures = [];
 
   @override
   void initState() {
@@ -357,11 +375,11 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
                       context,
                       MaterialPageRoute(
                           builder: (context) =>
-                              MyApp()), // Retour à la page d'accueil
+                              const MyApp()), // Retour à la page d'accueil
                     );
                   },
                   child: Image.asset(
-                    'assets/images/docare_logo.png',
+                    'assets/images/docare_logo2.png',
                     width: 50,
                     height: 50,
                   ),

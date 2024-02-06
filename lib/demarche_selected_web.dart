@@ -2,10 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:docare/main.dart';
 import 'package:flutter/services.dart'
     show rootBundle; // Pour charger un fichier depuis les assets
-import 'package:provider/provider.dart'; // Pour utiliser le provider
-import 'package:docare/user.dart'; // Classe User
-import 'package:docare/folder.dart'; // Classe Folder
-
 import 'package:flutter/foundation.dart';
 import 'package:docare/hyperlink.dart'; // Pour afficher un lien hypertexte
 import 'package:docare/footer_web.dart'; // Pour afficher le footer
@@ -28,61 +24,6 @@ class _DemarcheSelectedInterfaceState extends State<DemarcheSelectedInterface> {
   Future<Uint8List> loadPdfFromAssets(String path) async {
     final byteData = await rootBundle.load(path);
     return byteData.buffer.asUint8List();
-  }
-
-  // Method to show dialog for new folder creation
-  void showCreateFolderDialog(BuildContext context) {
-    final TextEditingController folderNameController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Nouveau dossier'),
-          content: TextField(
-            controller: folderNameController,
-            decoration: const InputDecoration(
-              hintText: 'Dossier sans titre',
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Annuler'),
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-            ),
-            TextButton(
-              child: const Text('Créer'),
-              onPressed: () {
-                String folderName = folderNameController
-                    .text; // Get the folder name from the input
-                if (folderName.isEmpty)
-                  folderName =
-                      "Dossier sans titre"; // If the folder name is empty, set it to "Dossier sans titre"
-                Folder newFolder = Folder(
-                  id: Provider.of<User>(context, listen: false)
-                      .folderList
-                      .length, // id = nombre de dossiers actuels
-                  name: folderName, // Nom du dossier
-                  parentId: Provider.of<User>(context, listen: false)
-                      .folderList[indexFolder]
-                      .id, // dossier parent = dossier actuel
-                  folders: [],
-                  files: [],
-                  owner: Provider.of<User>(context,
-                      listen: false), // Propriétaire = utilisateur actuel
-                  sharedWith: [],
-                );
-                folderName = ""; // Clear the folder name
-                
-                Navigator.of(context).pop(); // Close the dialog
-              },
-            ),
-          ],
-        );
-      },
-    );
   }
 
   TextEditingController searchController = TextEditingController(); // Contrôleur pour la barre de recherche
@@ -192,9 +133,10 @@ class _DemarcheSelectedInterfaceState extends State<DemarcheSelectedInterface> {
                     borderRadius: BorderRadius.circular(8.0), // Rounded corners
                   ),
                   child: ElevatedButton(
-                    onPressed: () {
-                      // Action when the button is pressed
+                    onPressed: () async {
+                      // TODO: Ajouter la fonctionnalité pour ouvrir le document
                     },
+
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.transparent, // Background color (transparent to show Container color)
                       disabledForegroundColor : Colors.grey, // Color for disabled button

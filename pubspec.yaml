@@ -36,7 +36,8 @@ dependencies:
   open_filex: ^4.3.4 # https://pub.dev/packages/open_filex
   path_provider: ^2.1.2 # https://pub.dev/packages/path_provider
   url_launcher: ^6.2.4 # https://pub.dev/packages/url_launcher
-
+  cunning_document_scanner: ^1.1.4 # https://pub.dev/packages/cunning_document_scanner
+  
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2

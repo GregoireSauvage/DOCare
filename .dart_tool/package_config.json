@@ -32,6 +32,12 @@
       "languageVersion": "2.18"
     },
     {
+      "name": "cunning_document_scanner",
+      "rootUri": "file:///C:/Users/gregs/AppData/Local/Pub/Cache/hosted/pub.dev/cunning_document_scanner-1.1.4",
+      "packageUri": "lib/",
+      "languageVersion": "2.15"
+    },
+    {
       "name": "cupertino_icons",
       "rootUri": "file:///C:/Users/gregs/AppData/Local/Pub/Cache/hosted/pub.dev/cupertino_icons-1.0.6",
       "packageUri": "lib/",
@@ -168,6 +174,42 @@
       "rootUri": "file:///C:/Users/gregs/AppData/Local/Pub/Cache/hosted/pub.dev/path_provider_windows-2.2.1",
       "packageUri": "lib/",
       "languageVersion": "2.19"
+    },
+    {
+      "name": "permission_handler",
+      "rootUri": "file:///C:/Users/gregs/AppData/Local/Pub/Cache/hosted/pub.dev/permission_handler-11.2.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.15"
+    },
+    {
+      "name": "permission_handler_android",
+      "rootUri": "file:///C:/Users/gregs/AppData/Local/Pub/Cache/hosted/pub.dev/permission_handler_android-12.0.3",
+      "packageUri": "lib/",
+      "languageVersion": "2.15"
+    },
+    {
+      "name": "permission_handler_apple",
+      "rootUri": "file:///C:/Users/gregs/AppData/Local/Pub/Cache/hosted/pub.dev/permission_handler_apple-9.3.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.15"
+    },
+    {
+      "name": "permission_handler_html",
+      "rootUri": "file:///C:/Users/gregs/AppData/Local/Pub/Cache/hosted/pub.dev/permission_handler_html-0.1.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
+      "name": "permission_handler_platform_interface",
+      "rootUri": "file:///C:/Users/gregs/AppData/Local/Pub/Cache/hosted/pub.dev/permission_handler_platform_interface-4.1.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.14"
+    },
+    {
+      "name": "permission_handler_windows",
+      "rootUri": "file:///C:/Users/gregs/AppData/Local/Pub/Cache/hosted/pub.dev/permission_handler_windows-0.2.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
     },
     {
       "name": "platform",
@@ -308,7 +350,7 @@
       "languageVersion": "3.2"
     }
   ],
-  "generated": "2024-02-05T13:03:26.572993Z",
+  "generated": "2024-02-06T12:42:25.612648Z",
   "generator": "pub",
   "generatorVersion": "3.2.3"
 }

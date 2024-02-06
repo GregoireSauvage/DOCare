@@ -148,6 +148,7 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            const Spacer(flex: 2),
             Image.asset(
               'assets/images/docare_logo.png',
               width: 200,
