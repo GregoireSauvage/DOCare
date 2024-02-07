@@ -28,6 +28,18 @@ class Document extends FileSystemEntity {
     folder.addFile(this); // Ajout du document au dossier
   }
 
+  Document.simpleConstructor({
+    required this.id,
+    required this.title,
+    required this.fileType,
+    required this.path,
+    required this.tags,
+    required this.creationDate,
+    required this.ownerId,
+    required this.folder,
+  }) : super(name: title, type: false);
+  
+
   // Getters
   int getId() {return id;}
   String getTitle() {return title;}
@@ -54,6 +66,10 @@ class Document extends FileSystemEntity {
     for (String tag in newTags){
       tags.add(tag);
     }
+  }
+
+  void modifyOwner(int newOwnerId) {
+    ownerId = newOwnerId;
   }
 
   // Method to show dialog to rename a document

@@ -30,16 +30,17 @@ class _DocumentScannerUIState extends State<DocumentScannerUI> {
   }
 
   void _initializeDocuments() {
+    
     _documents = List.generate(
       widget.pictures.length,
-      (index) => Document(
+      (index) => Document.simpleConstructor(
         id: index,
         title: 'Document $index',
-        fileType: 'image',
+        fileType: 'img',
         path: widget.pictures[index],
         tags: [_prediction],
         creationDate: DateTime.now(),
-        ownerId: 0,
+        ownerId: -1,
         folder: Provider.of<User>(context, listen: false).folderList[0],
       ),
     );
@@ -57,7 +58,7 @@ class _DocumentScannerUIState extends State<DocumentScannerUI> {
   Future<void> classifyImage() async {
     File image = File(widget.pictures[0]);
 
-    final url = Uri.parse('http://10.0.2.2:5000/predict');
+    final url = Uri.parse('http://10.5.21.251:5000/predict');
     var request = http.MultipartRequest('POST', url);
     request.files.add(await http.MultipartFile.fromPath('image', image.path));
     try {
@@ -173,7 +174,11 @@ class _DocumentScannerUIState extends State<DocumentScannerUI> {
             right: 26.0,
             child: ElevatedButton(
               onPressed: () {
-                // Action to perform when 'Validate' button is pressed
+                for(int i = 0; i < _documents.length; i++) {
+                  _documents[i].modifyOwner(Provider.of<User>(context, listen: false).userId);
+                  Provider.of<User>(context, listen: false).folderList[0].addFile(_documents[i]);
+                }
+
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue, // Button color

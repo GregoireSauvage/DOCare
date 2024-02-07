@@ -68,18 +68,36 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
                   sharedWith: [],
                   );
                 folderName = ""; // Clear the folder name
-                setState(() {
-                  filteredEntity.clear(); // Clear the list of documents
-                  // Add folders and files from the selected folder to filteredEntity
-                  filteredEntity.addAll(
-                      Provider.of<User>(context, listen: false)
-                          .folderList[indexFolder]
-                          .folders);
-                  filteredEntity.addAll(
-                      Provider.of<User>(context, listen: false)
-                          .folderList[indexFolder]
-                          .files);
-                });
+                refreshUI();
+                Navigator.of(context).pop(); // Close the dialog
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Method to show dialog for new folder creation
+  void showDeleteEntityDialog(BuildContext context, FileSystemEntity entity) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          
+          title: Text('Supprimer le ${entity is Document ? 'document' : 'dossier'}'),
+          
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Annuler'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+            ),
+            TextButton(
+              child: const Text('Supprimer'),
+              onPressed: () {
+                showDeleteEntityDialog(context, entity); // Appelle la méthode pour créer un nouveau dossier
                 Navigator.of(context).pop(); // Close the dialog
               },
             ),
@@ -129,6 +147,21 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
       );
     }
   }
+
+  void refreshUI() {
+  setState(() {
+    filteredEntity.clear();
+    filteredEntity.addAll(
+        Provider.of<User>(context, listen: false)
+            .folderList[indexFolder]
+            .folders);
+    filteredEntity.addAll(
+        Provider.of<User>(context, listen: false)
+            .folderList[indexFolder]
+            .files);
+  });
+}
+
 
   void newDocument() async {
     // async pour pouvoir utiliser await
@@ -454,7 +487,6 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
                           Folder folder = filteredEntity[index] as Folder; // Cast en Folder
 
                           setState(() {
-
                             indexFolder = FindFolderIndexWithId(folder.id); // Change the current folder index
                             filteredEntity.clear(); // Clear the list of documents
                             searchController.clear(); // Clear the search bar
@@ -500,18 +532,7 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
                             if(filteredEntity[index] is Document) {
                               Document document = filteredEntity[index] as Document; // Cast en Document
                               document.showRenameDocumentDialog(context, () { // Affiche la boîte de dialogue pour renommer le document
-                                  setState(() { // Met à jour l'interface
-                                    filteredEntity.clear(); // Clear the list of documents
-                                    // Add folders and files from the selected folder to filteredEntity
-                                    filteredEntity.addAll(
-                                        Provider.of<User>(context, listen: false)
-                                            .folderList[indexFolder]
-                                            .folders);
-                                    filteredEntity.addAll(
-                                        Provider.of<User>(context, listen: false)
-                                            .folderList[indexFolder]
-                                            .files);
-                                  });
+                                  refreshUI();
                                 }); 
                             }
                             else {
@@ -531,7 +552,19 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
                                       .files);
                             });
                           } else if (value == 'delete') {
-                            // Code for deleting
+                            if(filteredEntity[index] is Folder) {
+                              Folder folder = filteredEntity[index] as Folder;
+                              Provider.of<User>(context, listen: false).removeFolder(folder.id); // Supprime le dossier
+
+                              Provider.of<User>(context, listen: false).folderList[indexFolder].removeFolder(folder); // Supprime le dossier de la liste des dossiers du dossier parent (dossier actuel
+
+                              
+                            } else {
+                              Document document = filteredEntity[index] as Document;
+                              Provider.of<User>(context, listen: false).removeDocument(document); // Supprime le document/dossier
+                              Provider.of<User>(context, listen: false).folderList[indexFolder].removeFile(document); // Supprime le document/dossier de la liste des documents/dossiers du dossier parent (dossier actuel)
+                            }
+                            refreshUI();
                           }
                         });
                       },

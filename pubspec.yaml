@@ -39,7 +39,8 @@ dependencies:
   cunning_document_scanner: ^1.1.4 # https://pub.dev/packages/cunning_document_scanner
   http: ^1.2.0
   html: ^0.15.4 # https://pub.dev/packages/html
-
+  collection: ^1.15.0
+  
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
