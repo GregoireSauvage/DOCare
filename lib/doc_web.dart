@@ -284,10 +284,11 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
     } else {
       setState(() {
         isElement = false;
-        filteredEntity = entity
-            .where(
-                (doc) => doc.name.toLowerCase().contains(query.toLowerCase()))
-            .toList();
+        filteredEntity = entity.where((doc) => doc.name.toLowerCase().contains(query.toLowerCase())).toList();
+        // filtre aussi dans la liste des tags
+        filteredEntity = filteredEntity + entity.where((doc) => (doc is Document) && doc.tags.any((tag) => tag.toLowerCase().contains(query.toLowerCase()))).toList();
+        // on enleve les doublons (si un document est trouvé dans les deux listes)
+        filteredEntity = filteredEntity.toSet().toList();
       });
     }
   }

@@ -43,7 +43,7 @@ void main() {
     title: "Carte d'identité",
     fileType: 'img',
     path: 'assets/documents/CNI_example.png',
-    tags: ["document d'identité"],
+    tags: ["document d'identités", "personnel"],
     creationDate: DateTime.now(),
     ownerId: currentUser.userId, // id de l'utilisateur propriétaire du document
     folder: currentUser.folderList[0], // dossier racine
