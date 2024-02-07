@@ -226,7 +226,7 @@ class _DemarcheInterfaceState extends State<DemarcheInterface> {
     description: 'La reconnaissance de la qualité de travailleur handicapé (RQTH) permet de bénéficier de mesures permettant de trouver un emploi ou de le conserver. La RQTH est attribuée pour une durée d’un à dix ans ou sans limite de durée dans certaines situations.',
     lien: "https://www.monparcourshandicap.gouv.fr/aides/la-reconnaissance-de-la-qualite-de-travailleur-handicape-rqth",
     documentsNecessaires: [
-      "Carte nationale d'identité",
+      "Carte d'identité",
       "Certificat médical",
       "Formulaire de demande MDPH",
       "justificatif de domicile",

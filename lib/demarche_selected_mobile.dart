@@ -15,7 +15,8 @@ import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:open_filex/open_filex.dart';
-
+import 'package:flutter_tts/flutter_tts.dart'; //Lecture
+import 'package:docare/font_size.dart'; // Pour utiliser la classe FontSizeSettings
 
 class DemarcheSelectedInterface extends StatefulWidget {
   final Demarche demarche;
@@ -34,17 +35,20 @@ class _DemarcheSelectedInterfaceState extends State<DemarcheSelectedInterface> {
     return byteData.buffer.asUint8List();
   }
 
-
   TextEditingController searchController =
       TextEditingController(); // Contrôleur pour la barre de recherche
   List<Demarche> filteredProcedure = []; // Liste des démarches filtrés
   int idFolder = 0; // Index du dossier actuel - 0 = /home (ou root)
   int indexFolder = 0;
   Map<String, List<Document>> documentsFournisSuggeres = {};
+  FlutterTts flutterTts = FlutterTts(); //fonction de lecture
 
   @override
   void initState() {
     super.initState();
+
+    flutterTts = FlutterTts(); //fonction de lecture
+    flutterTts.setLanguage("fr-FR"); //fonction de lecture
 
     filteredProcedure.clear();
     filteredProcedure.add(widget.demarche);
@@ -71,6 +75,10 @@ class _DemarcheSelectedInterfaceState extends State<DemarcheSelectedInterface> {
       // Convert the list to a set to remove duplicates, then back to a list
       documentsFournisSuggeres[key] = value.toSet().toList();
     });
+  }
+
+  Future<void> _speak(String text) async {
+    await flutterTts.speak(text);
   }
 
   // This method uses open_filex to open the file.
@@ -117,14 +125,12 @@ class _DemarcheSelectedInterfaceState extends State<DemarcheSelectedInterface> {
   // Callback function to update UI
   void updateUI() {
     setState(() {
-      isElement = false;
       filteredProcedure.clear();
       filteredProcedure.add(widget.demarche);
     });
   }
 
-  bool isElement =
-      false; // True if the context menu is opened on an element (folder or document) - False if the context menu is opened on the background
+  bool isExpanded = true; // Etat de l'expansion de la description
 
   @override
   Widget build(BuildContext context) {
@@ -169,18 +175,60 @@ class _DemarcheSelectedInterfaceState extends State<DemarcheSelectedInterface> {
               ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.only(
-                left: 30, top: 30.0, bottom: 6.0, right: 30.0),
-            child: Text(
-              widget.demarche.description, // Description de la démarche
-              style: const TextStyle(fontSize: 18, color: Colors.black),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 30.0, bottom: 20.0),
-            child: Hyperlink(widget.demarche.lien,
-                widget.demarche.name), // Lien hypertexte pour la démarche
+          Visibility(
+              //ca
+              visible:
+                  isExpanded, // Affiche ou cache les widgets en fonction de l'état
+              child: Column(children: [
+                Padding(
+                  padding: const EdgeInsets.only(
+                      left: 30, top: 30.0, bottom: 6.0, right: 30.0),
+                  child: Text(
+                    widget.demarche.description, // Description de la démarche
+                    style: TextStyle(
+                        fontSize: FontSizeSettings.fontSize,
+                        color: Colors.black),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(
+                      left: 30.0, bottom: 20.0, right: 30.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment
+                        .spaceBetween, // Alignement des éléments à droite
+                    children: [
+                      Hyperlink(
+                          widget.demarche.lien,
+                          widget.demarche
+                              .name), // Lien hypertexte pour la démarche
+                      SizedBox(
+                          width:
+                              20.0), // Ajoute un espace de 20 pixels entre les deux éléments
+                      InkWell(
+                        onTap: () {
+                          _speak(widget.demarche.description);
+                        },
+                        child: Icon(
+                          Icons.volume_up,
+                          size: 48.0, // Taille de l'icône
+                          color: Colors.blue, // Couleur de l'icône
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ])),
+          IconButton(
+            icon: Icon(isExpanded
+                ? Icons.arrow_drop_up
+                : Icons
+                    .arrow_drop_down), // Utilise une icône de flèche vers le haut ou vers le bas en fonction de l'état
+            onPressed: () {
+              setState(() {
+                isExpanded =
+                    !isExpanded; // Inverse l'état (développé -> caché ou caché -> développé)
+              });
+            },
           ),
           const Padding(
               padding: EdgeInsets.all(8.0),

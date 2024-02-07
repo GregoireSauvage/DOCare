@@ -14,11 +14,12 @@ import 'package:docare/document.dart'; // Pour utiliser la classe Document
 import 'package:docare/folder.dart'; // Pour utiliser la classe Folder
 import 'package:docare/demarche.dart'; // Pour utiliser la classe Demarche
 
-import 'package:docare/context_menu_mobile.dart'  // Charge la version mobile (dummy)
-  if(dart.library.html) 'package:docare/context_menu.dart'; // Pour utiliser la classe MenuActions
+import 'package:docare/context_menu_mobile.dart' // Charge la version mobile (dummy)
+    if (dart.library.html) 'package:docare/context_menu.dart'; // Pour utiliser la classe MenuActions
+
+import 'package:docare/font_size.dart'; // Pour utiliser la classe FontSizeSettings
 
 void main() {
-  
   // Create user
   User currentUser = User(
     userId: 1,
@@ -28,13 +29,15 @@ void main() {
     folderList: [],
   );
 
-  Folder root = Folder( // Dossier racine
+  Folder root = Folder(
+    // Dossier racine
     id: 0,
     name: 'home',
     parentId: -1, // pas de dossier parent (dossier racine)
     folders: [],
     files: [],
-    owner: currentUser, // utilisateur propriétaire du dossier (automatiquement ajouté à la liste des dossiers de l'utilisateur)
+    owner:
+        currentUser, // utilisateur propriétaire du dossier (automatiquement ajouté à la liste des dossiers de l'utilisateur)
     sharedWith: [],
   );
 
@@ -59,7 +62,6 @@ void main() {
     folder: currentUser.folderList[0], // dossier racine
   );
 
-
   Folder folder1 = Folder(
     id: 1,
     name: 'Dossier 1',
@@ -70,7 +72,7 @@ void main() {
     sharedWith: [],
   );
   folder1.addFile(CNI); // Ajout du document CNI au dossier 1
-  
+
   Folder folder2 = Folder(
     id: 2,
     name: 'Dossier 2',
@@ -92,24 +94,23 @@ void main() {
     sharedWith: [],
   );
 
-  
-
   runApp(
-  MultiProvider(
-    providers: [
-      ChangeNotifierProvider<User>(create: (context) => currentUser), // Existing user provider
-      ChangeNotifierProvider<MenuActions>(create: (context) => MenuActions()), // Additional MenuActions provider
-    ],
-    child: const MyApp(),
-  ),
-);
-
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider<User>(
+            create: (context) => currentUser), // Existing user provider
+        ChangeNotifierProvider<MenuActions>(
+            create: (context) =>
+                MenuActions()), // Additional MenuActions provider
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
-
   const MyApp({super.key}); // Constructeur
-  
+
   // This widget is the root of the application.
   @override
   Widget build(BuildContext context) {
@@ -121,7 +122,6 @@ class MyApp extends StatelessWidget {
       ),
       home: const MyHomePage(title: 'DOCare Home Page'),
     );
-    
   }
 }
 
@@ -150,6 +150,61 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.only(
+                  top: 20.0), // Adjust the top padding as needed
+              child: InkWell(
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: const Text('Réglages de la police'),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            Text(
+                                'Taille actuelle de la police: ${FontSizeSettings.fontSize}'),
+                            Slider(
+                              value: FontSizeSettings.fontSize,
+                              min: 10,
+                              max: 30,
+                              divisions: 20,
+                              label:
+                                  FontSizeSettings.fontSize.round().toString(),
+                              onChanged: (value) {
+                                setState(() {
+                                  FontSizeSettings.setFontSize(value);
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                        actions: <Widget>[
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text('Fermer'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+                child: const Row(
+                  children: [
+                    Icon(Icons.settings,
+                        size: 34), // Utilise une icône de rouage
+                    SizedBox(
+                        width:
+                            10), // Espaceur horizontal pour séparer l'icône du texte
+                    // Ajouter ici le texte ou d'autres widgets si nécessaire
+                  ],
+                ),
+              ),
+            ),
+
             const Spacer(flex: 2),
             Image.asset(
               'assets/images/docare_logo.png',
@@ -215,7 +270,6 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
 
-            
             const Spacer(flex: 2)
           ],
         ),
