@@ -89,13 +89,19 @@ class _DemarcheInterfaceState extends State<DemarcheInterface> {
   Demarche demarche1 = Demarche(
     id: 1,
     name: 'Demande RQTH',
-    description: 'La reconnaissance de la qualité de travailleur handicapé (RQTH) permet de bénéficier de mesures permettant de trouver un emploi ou de le conserver. La RQTH est attribuée pour une durée d’un à dix ans ou sans limite de durée dans certaines situations.',
+    description: 'La reconnaissance de la qualité de travailleur handicapé (RQTH) permet de bénéficier de mesures permettant de trouver un emploi ou de le conserver.',
     lien: "https://www.monparcourshandicap.gouv.fr/aides/la-reconnaissance-de-la-qualite-de-travailleur-handicape-rqth",
     documentsNecessaires: [
-      "Carte nationale d'identité",
+      "Carte d'identité",
       "Certificat médical",
       "Formulaire de demande MDPH",
       "justificatif de domicile",
+    ],
+    tagsDocumentsNecessaires: [
+      "document d'identités",
+      "certificat médical",
+      "RQTH",
+      "domicile",
     ],
     documentsFournis: [],
   );
@@ -110,7 +116,7 @@ class _DemarcheInterfaceState extends State<DemarcheInterface> {
     filteredProcedure.add(demarche1);
   }
 
-  // Méthode pour rechercher un document
+  // Méthode pour rechercher une demarche
   void searchDocuments(String query, indexFolder) {
     List<Demarche> demarches = [];
     demarches.add(demarche1); // faire la liste des démarches
@@ -154,7 +160,7 @@ class _DemarcheInterfaceState extends State<DemarcheInterface> {
               decoration: const InputDecoration(
                 filled: true,
                 fillColor: Colors.white,
-                hintText: 'Rechercher un document',
+                hintText: 'Rechercher une démarche',
                 prefixIcon: Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(4.0)),

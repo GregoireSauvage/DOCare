@@ -231,6 +231,12 @@ class _DemarcheInterfaceState extends State<DemarcheInterface> {
       "Formulaire de demande MDPH",
       "justificatif de domicile",
     ],
+    tagsDocumentsNecessaires: [
+      "document d'identités",
+      "certificat médical",
+      "RQTH",
+      "domicile",
+    ],
     documentsFournis: [],
   );
 
@@ -244,7 +250,7 @@ class _DemarcheInterfaceState extends State<DemarcheInterface> {
     filteredProcedure.add(demarche1);
   }
 
-  // Méthode pour rechercher un document
+  // Méthode pour rechercher une démarche
   void searchDocuments(String query, indexFolder) {
     List<Demarche> demarches = [];
     demarches.add(demarche1); // faire la liste des démarches
@@ -289,7 +295,7 @@ class _DemarcheInterfaceState extends State<DemarcheInterface> {
               decoration: const InputDecoration(
                 filled: true,
                 fillColor: Colors.white,
-                hintText: 'Rechercher un document',
+                hintText: 'Rechercher une démarche',
                 prefixIcon: Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(4.0)),

@@ -360,7 +360,7 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
   }
 
   // Méthode pour trouver l'index d'un dossier dans la liste des dossiers de l'utilisateur
-  int FindFolderIndexWithId(int id) {
+  int findFolderIndexWithId(int id) {
 
     for(int i = 0; i < Provider.of<User>(context, listen: false).folderList.length; i++) {
       if(Provider.of<User>(context, listen: false).folderList[i].id == id) {
@@ -377,8 +377,8 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
     int i = indexFolder;
     while(currentFolder.parentId >= 0) { // Tant que le dossier actuel n'est pas /home 
       path = "${Provider.of<User>(context, listen: false).folderList[i].name}/$path"; // Remonte d'un niveau
-      currentFolder = Provider.of<User>(context, listen: false).folderList[FindFolderIndexWithId(currentFolder.parentId)];
-      i = FindFolderIndexWithId(currentFolder.id);
+      currentFolder = Provider.of<User>(context, listen: false).folderList[findFolderIndexWithId(currentFolder.parentId)];
+      i = findFolderIndexWithId(currentFolder.id);
     }
     path = "/home/$path"; // Ajoute /home au début du chemin
     path = path.substring(0, path.length - 1); // Supprime le dernier /
@@ -439,7 +439,7 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
                   // InkWell pour rendre l'image cliquable
                   onTap: () {
                     Folder folder = Provider.of<User>(context, listen: false).folderList[indexFolder];
-                    int parentdIndexFolder = FindFolderIndexWithId(folder.parentId); // Change the current folder index
+                    int parentdIndexFolder = findFolderIndexWithId(folder.parentId); // Change the current folder index
                     if(parentdIndexFolder < 0) parentdIndexFolder = 0; 
                     setState(() {
                           indexFolder = parentdIndexFolder;
@@ -488,7 +488,7 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
                           Folder folder = filteredEntity[index] as Folder; // Cast en Folder
 
                           setState(() {
-                            indexFolder = FindFolderIndexWithId(folder.id); // Change the current folder index
+                            indexFolder = findFolderIndexWithId(folder.id); // Change the current folder index
                             filteredEntity.clear(); // Clear the list of documents
                             searchController.clear(); // Clear the search bar
                             // Add folders and files from the selected folder to filteredEntity
