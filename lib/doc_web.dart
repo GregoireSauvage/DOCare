@@ -454,6 +454,7 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
     return path;
   }
 
+
   // Callback function to update UI
   void updateUI() {
     setState(() {
@@ -651,19 +652,7 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
                               if(filteredEntity[index] is Document) {
                                 Document document = filteredEntity[index] as Document; // Cast en Document
                                 document.showRenameDocumentDialog(context, () { // Affiche la boîte de dialogue pour renommer le document
-                                  setState(() { // Met à jour l'interface
-                                    isElement = false; 
-                                    filteredEntity.clear(); // Clear the list of documents
-                                    // Add folders and files from the selected folder to filteredEntity
-                                    filteredEntity.addAll(
-                                        Provider.of<User>(context, listen: false)
-                                            .folderList[indexFolder]
-                                            .folders);
-                                    filteredEntity.addAll(
-                                        Provider.of<User>(context, listen: false)
-                                            .folderList[indexFolder]
-                                            .files);
-                                  });
+                                  updateUI();
                                 }); 
                                 
                               }
@@ -673,7 +662,19 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
                               }
                               
                             } else if (value == 'delete') {
-                              // Code for deleting
+                              if(filteredEntity[index] is Folder) {
+                                Folder folder = filteredEntity[index] as Folder;
+                                Provider.of<User>(context, listen: false).removeFolder(folder.id); // Supprime le dossier
+
+                                Provider.of<User>(context, listen: false).folderList[indexFolder].removeFolder(folder); // Supprime le dossier de la liste des dossiers du dossier parent (dossier actuel
+
+                                
+                              } else {
+                                Document document = filteredEntity[index] as Document;
+                                Provider.of<User>(context, listen: false).removeDocument(document); // Supprime le document/dossier
+                                Provider.of<User>(context, listen: false).folderList[indexFolder].removeFile(document); // Supprime le document/dossier de la liste des documents/dossiers du dossier parent (dossier actuel)
+                              }
+                              updateUI();
                             }
                             
                           });
