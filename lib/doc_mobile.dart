@@ -18,6 +18,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:cunning_document_scanner/cunning_document_scanner.dart'; // Pour scanner un document
 import 'package:docare/scanner_UI_mobile.dart'; // Pour scanner un document
 
+import 'package:docare/font_size.dart';
+
 class DocumentInterface extends StatefulWidget {
   @override
   _DocumentInterfaceState createState() => _DocumentInterfaceState();
@@ -219,7 +221,7 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
     return Container(
       alignment: Alignment.center,
       padding: EdgeInsets.all(padding),
-      color: Colors.blue,
+      color: ColorSettings.backgroundColor,
       child: Row(
         children: <Widget>[
           const SizedBox(width: 8.0), // Espace entre les boutons
@@ -298,7 +300,7 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
                           alignment: Alignment.center,
                           child: screenWidth > 700
                         ? Text('Nouveau') // Si l'écran est large (texte)
-                        : Icon(Icons.add, color: Colors.blue) // Si l'écran est petit (icone)
+                        : Icon(Icons.add, color: ColorSettings.backgroundColor) // Si l'écran est petit (icone)
                         ),
                         
                         
@@ -386,6 +388,33 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
     return path;
   }
 
+  Widget _buildImage2() {
+    if (ColorSettings.backgroundColor == Color.fromARGB(255, 28, 120, 205)) {
+      return Image.asset(
+        'assets/images/PFE_logo_bleu2.png',
+        width: 50,
+        height: 50,
+        fit: BoxFit.contain,
+      );
+    } else if (ColorSettings.backgroundColor ==
+        Color.fromARGB(255, 43, 130, 119)) {
+      return Image.asset(
+        'assets/images/PFE_logo_vert2.png',
+        width: 50,
+        height: 50,
+        fit: BoxFit.contain,
+      );
+    } else {
+      // Si aucune des conditions n'est vraie, vous pouvez retourner une image par défaut ou un widget vide
+      return Image.asset(
+        'assets/images/PFE_logo_violet2.png',
+        width: 50,
+        height: 50,
+        fit: BoxFit.contain,
+      );
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -396,7 +425,7 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
         crossAxisAlignment: CrossAxisAlignment.start, // Alignement à gauche
         children: <Widget>[
           Container(
-            color: Colors.blue,
+            color: ColorSettings.backgroundColor,
             padding: const EdgeInsets.all(20.0),
             margin: const EdgeInsets.only(bottom: 0.0),
             child: Row(
@@ -412,11 +441,7 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
                               const MyApp()), // Retour à la page d'accueil
                     );
                   },
-                  child: Image.asset(
-                    'assets/images/docare_logo2.png',
-                    width: 50,
-                    height: 50,
-                  ),
+                  child: _buildImage2(),
                 ),
                 const Expanded(
                   child: Text(
@@ -573,7 +598,7 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
                       child: GridTile(
                         footer: Container(
                           padding: const EdgeInsets.all(4.0),
-                          color: Colors.blue.withOpacity(0.8),
+                          color: ColorSettings.backgroundColor,
                           child: Text(
                             filteredEntity[index].name,
                             textAlign: TextAlign.center,

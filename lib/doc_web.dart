@@ -17,6 +17,8 @@ import 'dart:ui_web' as ui; // Pour afficher un pdf dans un dialogue
 import 'package:docare/footer_web.dart'; // Pour afficher le footer
 import 'package:docare/context_menu.dart'; // Pour afficher le menu contextuel (clic droit)
 
+import 'package:docare/font_size.dart';
+
 
 class DocumentInterface extends StatefulWidget {
   @override
@@ -172,7 +174,7 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
                   sharedWith: [],
                 );
                 folderName = ""; // Clear the folder name
-                
+                updateUI();
                 Navigator.of(context).pop(); // Close the dialog
               },
             ),
@@ -305,7 +307,7 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
     return Container(
       alignment: Alignment.center,
       padding: EdgeInsets.all(padding),
-      color: Colors.blue,
+      color: ColorSettings.backgroundColor,
       child: Row(
         children: <Widget>[
           const SizedBox(width: 8.0),
@@ -392,8 +394,8 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.add,
-                            color: Colors.blue), // Icon with color
+                        Icon(Icons.add,
+                            color: ColorSettings.backgroundColor), // Icon with color
                         SizedBox(
                             width: screenWidth > 600
                                 ? 20
@@ -406,7 +408,7 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
                             style: TextStyle(
                               fontSize:
                                   screenWidth > 600 ? 20 : 14, // Font size
-                              color: Colors.blue, // Text color
+                              color: ColorSettings.backgroundColor, // Text color
                             ),
                           ),
                         ),
@@ -472,6 +474,33 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
 
   bool isElement = false; // True if the context menu is opened on an element (folder or document) - False if the context menu is opened on the background
 
+  Widget _buildImage2() {
+    if (ColorSettings.backgroundColor == Color.fromARGB(255, 28, 120, 205)) {
+      return Image.asset(
+        'assets/images/PFE_logo_bleu2.png',
+        width: 50,
+        height: 50,
+        fit: BoxFit.contain,
+      );
+    } else if (ColorSettings.backgroundColor ==
+        Color.fromARGB(255, 43, 130, 119)) {
+      return Image.asset(
+        'assets/images/PFE_logo_vert2.png',
+        width: 50,
+        height: 50,
+        fit: BoxFit.contain,
+      );
+    } else {
+      // Si aucune des conditions n'est vraie, vous pouvez retourner une image par défaut ou un widget vide
+      return Image.asset(
+        'assets/images/PFE_logo_violet2.png',
+        width: 50,
+        height: 50,
+        fit: BoxFit.contain,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     String path = getFolderPath();
@@ -490,7 +519,7 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
             crossAxisAlignment: CrossAxisAlignment.start, // Alignement à gauche
             children: <Widget>[
               Container(
-                color: Colors.blue,
+                color: ColorSettings.backgroundColor,
                 padding: const EdgeInsets.all(14.0),
                 margin: const EdgeInsets.only(bottom: 0.0),
                 child: Row(
@@ -506,11 +535,7 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
                                   MyApp()), // Retour à la page d'accueil
                         );
                       },
-                      child: Image.asset(
-                        'assets/images/docare_logo2.png',
-                        width: 50,
-                        height: 50,
-                      ),
+                      child: _buildImage2(),
                     ),
                     const Expanded(
                       child: Text(
@@ -683,7 +708,7 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
                           child: GridTile(
                               footer: Container(
                                 padding: const EdgeInsets.all(4.0),
-                                color: Colors.blue.withOpacity(0.8),
+                                color: ColorSettings.backgroundColor,
                                 child: Text(
                                   filteredEntity[index].name,
                                   textAlign: TextAlign.center,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:docare/font_size.dart';
 
 class Hyperlink extends StatelessWidget {
   final String url;
@@ -26,9 +27,10 @@ class Hyperlink extends StatelessWidget {
       onTap: _launchURL,
       child: Text(
         text,
-        style: const TextStyle(
+        style: TextStyle(
           decoration: TextDecoration.underline,
           color: Colors.blue,
+          fontSize: FontSizeSettings.fontSize-3,
         ),
       ),
     );

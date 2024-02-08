@@ -79,6 +79,13 @@ flutter:
    - assets/documents/iam_DS-3.pdf
    - assets/images/folder.png
    - assets/images/pdf_icon.jpeg
+   - assets/images/PFE_logo_vert.png
+   - assets/images/PFE_logo_bleu.png
+   - assets/images/PFE_logo_violet.png
+   - assets/images/PFE_logo_vert2.png
+   - assets/images/PFE_logo_bleu2.png
+   - assets/images/PFE_logo_violet2.png
+
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

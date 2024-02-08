@@ -8,17 +8,21 @@ import 'package:docare/doc_mobile.dart' // par defaut charge la version mobile
 import 'package:docare/demarche_mobile.dart'
     if (dart.library.html) 'package:docare/demarche_web.dart';
 
+import 'package:provider/provider.dart'; // Pour utiliser le provider
+import 'package:docare/user.dart'; // Pour utiliser la classe User
+import 'package:docare/document.dart'; // Pour utiliser la classe Document
 import 'package:docare/folder.dart'; // Pour utiliser la classe Folder
-import 'package:flutter/foundation.dart';
+import 'package:docare/demarche.dart'; // Pour utiliser la classe Demarche
 
 import 'package:docare/context_menu_mobile.dart' // Charge la version mobile (dummy)
     if (dart.library.html) 'package:docare/context_menu.dart'; // Pour utiliser la classe MenuActions
-
-import 'package:cunning_document_scanner/cunning_document_scanner.dart'; // Pour scanner un document
-import 'package:docare/scanner_UI_mobile.dart'; // Charge la version mobile (dummy)
-import 'package:docare/font_size.dart'; // Pour utiliser la classe FontSizeSettings
 import 'package:file_picker/file_picker.dart'; // Pour sélectionner un fichier
 import 'dart:typed_data'; // Pour convertir un fichier en bytes
+import 'package:cunning_document_scanner/cunning_document_scanner.dart'; // Pour scanner un document
+import 'package:flutter/foundation.dart';
+import 'package:docare/scanner_UI_mobile.dart'; // Charge la version mobile (dummy)
+
+import 'package:docare/font_size.dart'; // Pour utiliser la classe FontSizeSettings
 
 void main() {
   // Create user
@@ -47,15 +51,11 @@ void main() {
     title: "Carte d'identité",
     fileType: 'img',
     path: 'assets/documents/CNI_example.png',
-    tags: ["document d'identités"],
+    tags: ["document d'identité"],
     creationDate: DateTime.now(),
     ownerId: currentUser.userId, // id de l'utilisateur propriétaire du document
     folder: currentUser.folderList[0], // dossier racine
   );
-
-  Document_BDD myDocumentBDD = Document_BDD(document: CNI);
-  print("Document BDD: ${myDocumentBDD.title}");
-  print("Document BDD: ${myDocumentBDD.folderId}");
   Document annaleIAM = Document(
     id: 1,
     title: "annale d'IAM",
@@ -140,83 +140,68 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  Widget _buildImage() {
+    if (ColorSettings.backgroundColor == Color.fromARGB(255, 28, 120, 205)) {
+      return Image.asset(
+        'assets/images/PFE_logo_bleu.png',
+        width: 200,
+        height: 200,
+        fit: BoxFit.contain,
+      );
+    } else if (ColorSettings.backgroundColor ==
+        Color.fromARGB(255, 43, 130, 119)) {
+      return Image.asset(
+        'assets/images/PFE_logo_vert.png',
+        width: 200,
+        height: 200,
+        fit: BoxFit.contain,
+      );
+    } else {
+      // Si aucune des conditions n'est vraie, vous pouvez retourner une image par défaut ou un widget vide
+      return Image.asset(
+        'assets/images/PFE_logo_violet.png',
+        width: 200,
+        height: 200,
+        fit: BoxFit.contain,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
         width: double.infinity,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.bottomCenter,
             end: Alignment.topCenter,
-            colors: [Color.fromARGB(255, 53, 0, 243), Colors.white],
+            colors: [ColorSettings.backgroundColor, Colors.white],
           ),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Padding(
-              padding: const EdgeInsets.only(
-                  top: 30.0), // Adjust the top padding as needed
+              padding: const EdgeInsets.only(top: 30.0), // Espaceur pour la marge gauche
               child: InkWell(
                 onTap: () {
-                  showDialog(
-                    context: context,
-                    builder: (context) {
-                      return AlertDialog(
-                        title: const Text('Réglages de la police'),
-                        content: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            Text(
-                                'Taille actuelle de la police: ${FontSizeSettings.fontSize}'),
-                            Slider(
-                              value: FontSizeSettings.fontSize,
-                              min: 10,
-                              max: 30,
-                              divisions: 20,
-                              label:
-                                  FontSizeSettings.fontSize.round().toString(),
-                              onChanged: (value) {
-                                setState(() {
-                                  FontSizeSettings.setFontSize(value);
-                                });
-                              },
-                            ),
-                          ],
-                        ),
-                        actions: <Widget>[
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                            child: const Text('Fermer'),
-                          ),
-                        ],
-                      );
-                    },
-                  );
+                  _showFontSizeSettingsDialog(
+                      context); // Appel de la nouvelle fonction de réglages de la police
                 },
-                child: const Row(
+                child: Row(
                   children: [
-                    Icon(Icons.settings,
-                        size: 34), // Utilise une icône de rouage
+                    Icon(Icons.settings, size: 34), // Utilise une icône de rouage
                     SizedBox(
                         width:
                             10), // Espaceur horizontal pour séparer l'icône du texte
-                    // Ajouter ici le texte ou d'autres widgets si nécessaire
                   ],
                 ),
               ),
             ),
-
             const Spacer(flex: 2),
-            Image.asset(
-              'assets/images/docare_logo.png',
-              width: 200,
-              height: 200,
-              fit: BoxFit.contain,
-            ),
+
+            _buildImage(),
             const Text('Bienvenue sur DOCare !',
                 style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
             const Text('Votre application tri administratif intelligent',
@@ -238,8 +223,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 // style pour le bouton "Mes documents"
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white, // Couleur de fond du bouton
-                  foregroundColor: const Color.fromARGB(
-                      255, 53, 0, 243), // Couleur du texte du bouton
+                  foregroundColor: ColorSettings.backgroundColor, // Couleur du texte du bouton
                   padding:
                       const EdgeInsets.symmetric(horizontal: 50, vertical: 17),
                 ),
@@ -247,10 +231,9 @@ class _MyHomePageState extends State<MyHomePage> {
                     const Text('Mes documents', style: TextStyle(fontSize: 20)),
               ),
             ),
+
             // Espacement entre les boutons //
             const SizedBox(height: 20),
-
-            // Bouton pour ajouter un document //
             SizedBox(
               width: 300,
               child: ElevatedButton(
@@ -277,7 +260,6 @@ class _MyHomePageState extends State<MyHomePage> {
                             ),
                             TextButton(
                               onPressed: () async {
-                                
                                 List<String> pictures =
                                     await CunningDocumentScanner.getPictures(
                                             true) ??
@@ -309,8 +291,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 // style pour le bouton
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white, // Couleur de fond du bouton
-                  foregroundColor: const Color.fromARGB(
-                      255, 53, 0, 243), // Couleur du texte du bouton
+                  foregroundColor: ColorSettings.backgroundColor, // Couleur du texte du bouton
                   padding:
                       const EdgeInsets.symmetric(horizontal: 50, vertical: 17),
                 ),
@@ -335,8 +316,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 // style pour le bouton "Mes démarches"
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white, // Couleur de fond du bouton
-                  foregroundColor: const Color.fromARGB(
-                      255, 53, 0, 243), // Couleur du texte du bouton
+                  foregroundColor: ColorSettings.backgroundColor, // Couleur du texte du bouton
                   padding:
                       const EdgeInsets.symmetric(horizontal: 50, vertical: 17),
                 ),
@@ -349,6 +329,142 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
       ),
+    );
+  }
+
+  void _showFontSizeSettingsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Réglages'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              // Titre pour la section Couleur
+              Text(
+                'Couleur',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+              SizedBox(height: 8), // Ajout d'un espace vertical
+
+              // Boutons prédéfinis pour les couleurs de fond et de texte
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        ColorSettings.setBackgroundColor(
+                            const Color.fromARGB(255, 28, 120, 205));
+                        ColorSettings.setFontColor(Colors.black);
+                      });
+                      Navigator.of(context).pop();
+                      _showFontSizeSettingsDialog(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      primary: const Color.fromARGB(
+                          255, 28, 120, 205), // Couleur de fond du bouton
+                      onPrimary: Colors.white, // Couleur de texte du bouton
+                    ),
+                    child: Text('Mode1'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        ColorSettings.setBackgroundColor(
+                            const Color.fromARGB(255, 43, 130, 119));
+                        ColorSettings.setFontColor(Colors.white);
+                      });
+                      Navigator.of(context).pop();
+                      _showFontSizeSettingsDialog(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      primary: const Color.fromARGB(
+                          255, 43, 130, 119), // Couleur de fond du bouton
+                      onPrimary: Colors.white, // Couleur de texte du bouton
+                    ),
+                    child: Text('Mode2'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        ColorSettings.setBackgroundColor(
+                            const Color.fromARGB(255, 155, 100, 141));
+                        ColorSettings.setFontColor(Colors.white);
+                      });
+                      Navigator.of(context).pop();
+                      _showFontSizeSettingsDialog(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      primary: const Color.fromARGB(
+                          255, 155, 100, 141), // Couleur de fond du bouton
+                      onPrimary: Colors.white, // Couleur de texte du bouton
+                    ),
+                    child: Text('Mode3'),
+                  ),
+                ],
+              ),
+              SizedBox(height: 16), // Ajout d'un espace vertical
+
+              // Titre pour la section Taille de police
+              Text(
+                'Taille de police',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+              SizedBox(height: 8), // Ajout d'un espace vertical
+
+              // Widget de réglage de la taille de la police
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  DropdownButton<int>(
+                    value: FontSizeSettings.fontSize?.toInt() ?? 10,
+                    onChanged: (newValue) {
+                      setState(() {
+                        if (newValue != null) {
+                          FontSizeSettings.setFontSize(newValue.toDouble());
+                        }
+                      });
+                      Navigator.of(context).pop();
+                      _showFontSizeSettingsDialog(context);
+                    },
+                    items: List.generate(21, (index) {
+                      int fontSize = index + 10;
+                      return DropdownMenuItem<int>(
+                        value: fontSize,
+                        child: Text(fontSize.toString()),
+                      );
+                    }).toList(),
+                  ),
+                  SizedBox(width: 8), // Ajout d'un espace horizontal
+                  Text(
+                    'Aa', // Exemple de taille de police
+                    style: TextStyle(
+                      fontSize: FontSizeSettings.fontSize.toDouble(),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 16), // Ajout d'un espace vertical
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Fermer'),
+            ),
+          ],
+        );
+      },
     );
   }
 }

@@ -19,6 +19,7 @@ import 'package:flutter_tts/flutter_tts.dart'; //Lecture
 import 'package:docare/font_size.dart'; // Pour utiliser la classe FontSizeSettings
 import 'package:file_picker/file_picker.dart'; // Pour sélectionner un fichier
 
+
 class DemarcheSelectedInterface extends StatefulWidget {
   final Demarche demarche;
 
@@ -186,6 +187,33 @@ class _DemarcheSelectedInterfaceState extends State<DemarcheSelectedInterface> {
 
   bool isExpanded = true; // Etat de l'expansion de la description
 
+  Widget _buildImage2() {
+    if (ColorSettings.backgroundColor == Color.fromARGB(255, 28, 120, 205)) {
+      return Image.asset(
+        'assets/images/PFE_logo_bleu2.png',
+        width: 50,
+        height: 50,
+        fit: BoxFit.contain,
+      );
+    } else if (ColorSettings.backgroundColor ==
+        Color.fromARGB(255, 43, 130, 119)) {
+      return Image.asset(
+        'assets/images/PFE_logo_vert2.png',
+        width: 50,
+        height: 50,
+        fit: BoxFit.contain,
+      );
+    } else {
+      // Si aucune des conditions n'est vraie, vous pouvez retourner une image par défaut ou un widget vide
+      return Image.asset(
+        'assets/images/PFE_logo_violet2.png',
+        width: 50,
+        height: 50,
+        fit: BoxFit.contain,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -193,7 +221,7 @@ class _DemarcheSelectedInterfaceState extends State<DemarcheSelectedInterface> {
         crossAxisAlignment: CrossAxisAlignment.start, // Alignement à gauche
         children: <Widget>[
           Container(
-            color: Colors.blue,
+            color: ColorSettings.backgroundColor,
             padding: const EdgeInsets.all(30.0),
             margin: const EdgeInsets.only(bottom: 0.0),
             child: Row(
@@ -209,11 +237,7 @@ class _DemarcheSelectedInterfaceState extends State<DemarcheSelectedInterface> {
                               const MyApp()), // Retour à la page d'accueil
                     );
                   },
-                  child: Image.asset(
-                    'assets/images/docare_logo2.png',
-                    width: 50,
-                    height: 50,
-                  ),
+                  child: _buildImage2(),
                 ),
                 Expanded(
                   child: Text(
@@ -265,7 +289,7 @@ class _DemarcheSelectedInterfaceState extends State<DemarcheSelectedInterface> {
                         child: Icon(
                           Icons.volume_up,
                           size: 48.0, // Taille de l'icône
-                          color: Colors.blue, // Couleur de l'icône
+                          color: ColorSettings.backgroundColor, // Couleur de l'icône
                         ),
                       ),
                     ],
@@ -371,8 +395,8 @@ class _DemarcheSelectedInterfaceState extends State<DemarcheSelectedInterface> {
                           Text(
                           docNecessaire,
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: Colors.blue,
+                          style: TextStyle(
+                            color: ColorSettings.backgroundColor,
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
                           ),
@@ -383,8 +407,8 @@ class _DemarcheSelectedInterfaceState extends State<DemarcheSelectedInterface> {
                               ? matchingDocs[index].name // Display the name of the first document if available
                               : "Ajouter un document", // Display this message if no documents are found
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: Colors.blue,
+                          style: TextStyle(
+                            color: ColorSettings.backgroundColor,
                             fontSize: 14,
                           ),
                         ),
@@ -394,7 +418,7 @@ class _DemarcheSelectedInterfaceState extends State<DemarcheSelectedInterface> {
                               ? Icons.check_circle
                               : Icons
                                   .add, // Display a checkmark if documents are found, or a plus sign if not
-                          color: Colors.blue,
+                          color: ColorSettings.backgroundColor,
                           size: 24,
                         ),
                         ],

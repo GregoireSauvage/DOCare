@@ -1,3 +1,4 @@
+import 'package:docare/font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:docare/main.dart';
 import 'package:file_picker/file_picker.dart'; // Pour sélectionner un fichier
@@ -17,6 +18,8 @@ import 'package:docare/footer_web.dart'; // Pour afficher le footer
 import 'package:docare/demarche.dart'; // Pour les demarches administratives
 import 'package:docare/demarche_selected_web.dart'; // Pour la page de démarche sélectionnée
 import 'package:url_launcher/url_launcher.dart';
+
+import 'package:docare/font_size.dart';
 
 class DemarcheInterface extends StatefulWidget {
   @override
@@ -282,7 +285,7 @@ class _DemarcheInterfaceState extends State<DemarcheInterface> {
     return Container(
       alignment: Alignment.center,
       padding: EdgeInsets.all(padding),
-      color: Colors.blue,
+      color: ColorSettings.backgroundColor,
       child: Row(
         children: <Widget>[
           const SizedBox(width: 8.0),
@@ -340,6 +343,33 @@ class _DemarcheInterfaceState extends State<DemarcheInterface> {
 
   bool isElement = false; // True if the context menu is opened on an element (folder or document) - False if the context menu is opened on the background
 
+  Widget _buildImage2() {
+    if (ColorSettings.backgroundColor == Color.fromARGB(255, 28, 120, 205)) {
+      return Image.asset(
+        'assets/images/PFE_logo_bleu2.png',
+        width: 50,
+        height: 50,
+        fit: BoxFit.contain,
+      );
+    } else if (ColorSettings.backgroundColor ==
+        Color.fromARGB(255, 43, 130, 119)) {
+      return Image.asset(
+        'assets/images/PFE_logo_vert2.png',
+        width: 50,
+        height: 50,
+        fit: BoxFit.contain,
+      );
+    } else {
+      // Si aucune des conditions n'est vraie, vous pouvez retourner une image par défaut ou un widget vide
+      return Image.asset(
+        'assets/images/PFE_logo_violet2.png',
+        width: 50,
+        height: 50,
+        fit: BoxFit.contain,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -352,7 +382,7 @@ class _DemarcheInterfaceState extends State<DemarcheInterface> {
         crossAxisAlignment: CrossAxisAlignment.start, // Alignement à gauche
         children: <Widget>[
           Container(
-            color: Colors.blue,
+            color: ColorSettings.backgroundColor,
             padding: const EdgeInsets.all(14.0),
             margin: const EdgeInsets.only(bottom: 0.0),
             child: Row(
@@ -368,11 +398,7 @@ class _DemarcheInterfaceState extends State<DemarcheInterface> {
                               MyApp()), // Retour à la page d'accueil
                     );
                   },
-                  child: Image.asset(
-                    'assets/images/docare_logo2.png',
-                    width: 50,
-                    height: 50,
-                  ),
+                  child: _buildImage2(),
                 ),
                 const Expanded(
                   child: Text(
@@ -440,8 +466,8 @@ class _DemarcheInterfaceState extends State<DemarcheInterface> {
           child: Text(
             filteredProcedure[index].name, // The text inside the button
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Colors.blue, // Text color
+            style: TextStyle(
+              color: ColorSettings.backgroundColor, // Text color
               fontWeight: FontWeight.bold, // Bold text
               fontSize: 16, // Text size
             ),
