@@ -112,3 +112,29 @@ class Document extends FileSystemEntity {
     );
   }
 }
+
+
+class Document_BDD {
+  int id=0;
+  String title="";
+  String fileType="";
+  String path="";  // chemin du fichier
+  List<String> tags=[]; // liste des tags
+  DateTime creationDate=DateTime.now();
+  int ownerId=0; // id de l'utilisateur propriétaire du document
+  int folderId=0; // id du dossier dans lequel se trouve le document
+
+  
+  Document_BDD({
+    required Document document,
+  }) {
+    id = document.id;
+    title = document.title;
+    fileType = document.fileType;
+    path = document.path;
+    tags = document.tags;
+    creationDate = document.creationDate;
+    ownerId = document.ownerId;
+    folderId = document.folder.id;
+  } 
+}

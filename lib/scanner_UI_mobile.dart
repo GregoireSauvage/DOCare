@@ -68,6 +68,7 @@ class _DocumentScannerUIState extends State<DocumentScannerUI> {
         var decodedResponse = json.decode(jsonResponse);
         setState(() {
           _prediction = decodedResponse['predicted_class'];
+          _prediction = decodedResponse['subcategory_prediction'];
           _initializeDocuments();
         });
       } else {

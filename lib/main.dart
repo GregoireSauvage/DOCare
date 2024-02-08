@@ -52,6 +52,10 @@ void main() {
     ownerId: currentUser.userId, // id de l'utilisateur propriétaire du document
     folder: currentUser.folderList[0], // dossier racine
   );
+
+  Document_BDD myDocumentBDD = Document_BDD(document: CNI);
+  print("Document BDD: ${myDocumentBDD.title}");
+  print("Document BDD: ${myDocumentBDD.folderId}");
   Document annaleIAM = Document(
     id: 1,
     title: "annale d'IAM",
