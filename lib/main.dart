@@ -8,16 +8,17 @@ import 'package:docare/doc_mobile.dart' // par defaut charge la version mobile
 import 'package:docare/demarche_mobile.dart'
     if (dart.library.html) 'package:docare/demarche_web.dart';
 
-import 'package:provider/provider.dart'; // Pour utiliser le provider
-import 'package:docare/user.dart'; // Pour utiliser la classe User
-import 'package:docare/document.dart'; // Pour utiliser la classe Document
 import 'package:docare/folder.dart'; // Pour utiliser la classe Folder
-import 'package:docare/demarche.dart'; // Pour utiliser la classe Demarche
+import 'package:flutter/foundation.dart';
 
 import 'package:docare/context_menu_mobile.dart' // Charge la version mobile (dummy)
     if (dart.library.html) 'package:docare/context_menu.dart'; // Pour utiliser la classe MenuActions
 
+import 'package:cunning_document_scanner/cunning_document_scanner.dart'; // Pour scanner un document
+import 'package:docare/scanner_UI_mobile.dart'; // Charge la version mobile (dummy)
 import 'package:docare/font_size.dart'; // Pour utiliser la classe FontSizeSettings
+import 'package:file_picker/file_picker.dart'; // Pour sélectionner un fichier
+import 'dart:typed_data'; // Pour convertir un fichier en bytes
 
 void main() {
   // Create user
@@ -242,7 +243,77 @@ class _MyHomePageState extends State<MyHomePage> {
                     const Text('Mes documents', style: TextStyle(fontSize: 20)),
               ),
             ),
+            // Espacement entre les boutons //
+            const SizedBox(height: 20),
 
+            // Bouton pour ajouter un document //
+            SizedBox(
+              width: 300,
+              child: ElevatedButton(
+                onPressed: () {
+                  if (kIsWeb) {
+                    newDocumentWeb();
+                  } else {
+                    // ouvre une pop pup pour demander si l'utilisateur veut ajouter un document
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: const Text('Ajouter un document'),
+                          content: const Text(
+                              'Voulez-vous scanner ou importer un document ?'),
+                          actions: <Widget>[
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop(); // ferme la pop up
+                                // Code to run only on mobile platforms
+                                newDocumentMobile();
+                              },
+                              child: const Text('Importer'),
+                            ),
+                            TextButton(
+                              onPressed: () async {
+                                
+                                List<String> pictures =
+                                    await CunningDocumentScanner.getPictures(
+                                            true) ??
+                                        [];
+                                if (pictures.isNotEmpty && mounted) {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          DocumentScannerUI(pictures: pictures),
+                                    ),
+                                  );
+                                }
+                              },
+                              child: const Text('Scanner'),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop(); // ferme la pop up
+                              },
+                              child: const Text('Annuler'),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  }
+                },
+                // style pour le bouton
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white, // Couleur de fond du bouton
+                  foregroundColor: const Color.fromARGB(
+                      255, 53, 0, 243), // Couleur du texte du bouton
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 50, vertical: 17),
+                ),
+                child: const Text('Ajouter un document',
+                    style: TextStyle(fontSize: 20)),
+              ),
+            ),
             // Espacement entre les boutons //
             const SizedBox(height: 20),
 
@@ -275,5 +346,78 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
     );
+  }
+}
+
+void newDocumentMobile() async {
+  // async pour pouvoir utiliser await
+  FilePickerResult? result = await FilePicker.platform.pickFiles(
+    withData: true, // Récupérer les données du fichier
+    type: FileType.custom,
+    allowedExtensions: [
+      'jpg',
+      'jpeg',
+      'png',
+      'pdf'
+    ], // Extensions de fichier autorisées
+  );
+
+  if (result != null) {
+    PlatformFile file = result.files.first;
+
+    // Vérifiez si le fichier est une image
+    if (['jpg', 'jpeg', 'png'].contains(file.extension)) {
+      // Convertir en Uint8List
+      Uint8List? fileBytes = file.bytes;
+      if (fileBytes != null) {
+        // Proceed with your logic
+        Widget image = Image.memory(fileBytes);
+
+        // Ajouter le document à la liste des documents de l'utilisateur
+        // TO DO:
+      } else {
+        // Handle the situation where bytes are not available
+        print('Error: File bytes are null');
+      }
+    } else if (file.extension == 'pdf') {
+      // Faire de même pour les PDF
+    } else {
+      // Gérer les autres types de fichiers ici
+      print('Type de fichier non supporté pour la visualisation directe.');
+    }
+  } else {
+    // L'utilisateur a annulé la sélection de fichier
+    print('Aucun fichier sélectionné.');
+  }
+}
+
+void newDocumentWeb() async {
+  // async pour pouvoir utiliser await
+  FilePickerResult? result = await FilePicker.platform.pickFiles(
+    // Sélectionner un fichier
+    type: FileType.custom,
+    allowedExtensions: [
+      'jpg',
+      'jpeg',
+      'png',
+      'pdf'
+    ], // Extensions de fichier autorisées
+  );
+  if (result != null) {
+    PlatformFile file = result.files.first;
+
+    // Vérifiez si le fichier est une image
+    if (['jpg', 'jpeg', 'png'].contains(file.extension)) {
+      // Convertir en Uint8List
+      Uint8List fileBytes = file.bytes!;
+      // Créer une image à partir des bytes
+      Widget image = Image.memory(fileBytes);
+    } else if (file.extension == 'pdf') {
+      PlatformFile file = result.files.first; // Récupérer le fichier
+      // traiter la nouvelle image
+    } else {
+      // L'utilisateur a annulé la sélection de fichier
+      print('Aucun fichier sélectionné.');
+    }
   }
 }
