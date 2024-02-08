@@ -18,6 +18,7 @@
             <category android:name="android.intent.category.DEFAULT" />
         </intent>
     </queries>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <application
         android:label="docare"
         android:name="${applicationName}"

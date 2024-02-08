@@ -100,7 +100,7 @@ class _DemarcheInterfaceState extends State<DemarcheInterface> {
     tagsDocumentsNecessaires: [
       "document d'identités",
       "certificat médical",
-      "RQTH",
+      "personnel",
       "domicile",
     ],
     documentsFournis: [],

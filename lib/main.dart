@@ -46,7 +46,7 @@ void main() {
     title: "Carte d'identité",
     fileType: 'img',
     path: 'assets/documents/CNI_example.png',
-    tags: ["document d'identités", "personnel"],
+    tags: ["document d'identités"],
     creationDate: DateTime.now(),
     ownerId: currentUser.userId, // id de l'utilisateur propriétaire du document
     folder: currentUser.folderList[0], // dossier racine
@@ -152,7 +152,7 @@ class _MyHomePageState extends State<MyHomePage> {
           children: <Widget>[
             Padding(
               padding: const EdgeInsets.only(
-                  top: 20.0), // Adjust the top padding as needed
+                  top: 30.0), // Adjust the top padding as needed
               child: InkWell(
                 onTap: () {
                   showDialog(

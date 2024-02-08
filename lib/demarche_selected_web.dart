@@ -2,16 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:docare/main.dart';
 import 'package:flutter/services.dart'
     show rootBundle; // Pour charger un fichier depuis les assets
+import 'package:provider/provider.dart'; // Pour utiliser le provider
+import 'package:docare/user.dart'; // Classe User
+import 'package:docare/folder.dart'; // Classe Folder
+
 import 'package:flutter/foundation.dart';
 import 'package:docare/hyperlink.dart'; // Pour afficher un lien hypertexte
-import 'package:docare/footer_web.dart'; // Pour afficher le footer
-import 'package:docare/document.dart'; // Pour les documents
 import 'package:docare/demarche.dart'; // Pour les demarches administratives
+import 'package:docare/document.dart'; // Pour les documents
+
+import 'package:docare/footer_web.dart'; // Pour le footer
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
+import 'package:open_filex/open_filex.dart';
 import 'package:flutter_tts/flutter_tts.dart'; //Lecture
-import 'package:docare/folder.dart'; // Pour les dossiers
-import 'package:provider/provider.dart'; // Pour utiliser le provider
-import 'package:docare/user.dart'; // Pour utiliser la classe User
 import 'package:docare/font_size.dart'; // Pour utiliser la classe FontSizeSettings
+import 'package:file_picker/file_picker.dart'; // Pour sélectionner un fichier
 
 class DemarcheSelectedInterface extends StatefulWidget {
   final Demarche demarche;
@@ -41,7 +47,7 @@ class _DemarcheSelectedInterfaceState extends State<DemarcheSelectedInterface> {
   @override
   void initState() {
     super.initState();
-    print("Selected procedure: ${widget.demarche.name}");
+
     flutterTts = FlutterTts(); //fonction de lecture
     flutterTts.setLanguage("fr-FR"); //fonction de lecture
 
@@ -58,13 +64,29 @@ class _DemarcheSelectedInterfaceState extends State<DemarcheSelectedInterface> {
           in Provider.of<User>(context, listen: false).folderList) {
         for (Document file in folder.files) {
           // Vérifie si le nom du fichier correspond à un document nécessaire
-          if (docNecessaire == file.name ||
-              widget.demarche.tagsDocumentsNecessaires.contains(file.tags)) {
+          if (docNecessaire == file.name) {
             documentsFournisSuggeres[docNecessaire]?.add(file);
+            print("trouvé: ${file.tags}");
+          }
+          for (int i = 0;
+              i < widget.demarche.tagsDocumentsNecessaires.length;
+              i++) {
+            for (int j = 0; j < file.tags.length; j++) {
+              if (widget.demarche.tagsDocumentsNecessaires[i] == file.tags[j]) {
+                documentsFournisSuggeres[docNecessaire]?.add(file);
+                print("trouvé: ${file.tags}");
+              }
+            }
           }
         }
       }
     }
+
+    // Iterate through the map to remove duplicates in each list
+    documentsFournisSuggeres.forEach((key, value) {
+      // Convert the list to a set to remove duplicates, then back to a list
+      documentsFournisSuggeres[key] = value.toSet().toList();
+    });
   }
 
   Future<void> _speak(String text) async {
@@ -79,7 +101,90 @@ class _DemarcheSelectedInterfaceState extends State<DemarcheSelectedInterface> {
     });
   }
 
-  bool isExpanded = true;
+  void newDocument() async {
+    // async pour pouvoir utiliser await
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      withData: true, // Récupérer les données du fichier
+      type: FileType.custom,
+      allowedExtensions: [
+        'jpg',
+        'jpeg',
+        'png',
+        'pdf'
+      ], // Extensions de fichier autorisées
+    );
+
+    if (result != null) {
+      PlatformFile file = result.files.first;
+
+      // Vérifiez si le fichier est une image
+      if (['jpg', 'jpeg', 'png'].contains(file.extension)) {
+        // Convertir en Uint8List
+        Uint8List? fileBytes = file.bytes;
+        if (fileBytes != null) {
+          // Proceed with your logic
+          Widget image = Image.memory(fileBytes);
+
+          // Ajouter le document à la liste des documents de l'utilisateur
+          // TO DO:
+        } else {
+          // Handle the situation where bytes are not available
+          print('Error: File bytes are null');
+        }
+      } else if (file.extension == 'pdf') {
+        // Faire de même pour les PDF
+      } else {
+        // Gérer les autres types de fichiers ici
+        print('Type de fichier non supporté pour la visualisation directe.');
+      }
+    } else {
+      // L'utilisateur a annulé la sélection de fichier
+      print('Aucun fichier sélectionné.');
+    }
+  }
+
+  // This method uses open_filex to open the file.
+  void _openFile(Document file, BuildContext context) async {
+    if (file.fileType == 'pdf') {
+      // Si le document est un PDF
+      final byteData = await rootBundle.load(file.path);
+      final tempDir = await getTemporaryDirectory();
+      final fileName = file.path.split('/').last;
+      final tempFile = File('${tempDir.path}/$fileName');
+      await tempFile.writeAsBytes(
+          byteData.buffer
+              .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes),
+          flush: true);
+
+      final result = await OpenFilex.open(tempFile.path);
+
+      // If the PDF couldn't be opened, show an error.
+      if (result.type != ResultType.done) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Failed to open the file: ${result.message}"),
+          ),
+        );
+      }
+    } else if (file.fileType == 'img') {
+      // Si le document est une image
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          content:
+              Image.asset(file.path), // Assuming `path` is a valid asset path
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Fermer'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
+  bool isExpanded = true; // Etat de l'expansion de la description
 
   @override
   Widget build(BuildContext context) {
@@ -208,31 +313,62 @@ class _DemarcheSelectedInterfaceState extends State<DemarcheSelectedInterface> {
                         color: const Color.fromRGBO(158, 158, 158, 1)),
                     borderRadius: BorderRadius.circular(8.0),
                   ),
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      if (matchingDocs.isNotEmpty) {
-                        var linkedDocument = matchingDocs[0];
-                        print("Opening document: $linkedDocument.name");
+                  child: GestureDetector(
+                    onSecondaryTap: () {
+                      // Check if there are matching documents and if the index is within bounds
+                      if (matchingDocs.isNotEmpty &&
+                          index < matchingDocs.length) {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('Ajouter un document'),
+                            content: Text(
+                                'Voulez-vous changer le document ${matchingDocs[index].name} pour la démarche ${widget.demarche.name}?'),
+                            actions: <Widget>[
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context)
+                                      .pop(); // Close the dialog
+                                  newDocument();
+                                },
+                                child: const Text('Oui'),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.of(context)
+                                    .pop(), // Close the dialog
+                                child: const Text('Non'),
+                              ),
+                            ],
+                          ),
+                        );
                       } else {
-                        // If no document is linked, do nothing for now
-                        print("No document linked to this requirement.");
+                        newDocument();
                       }
                     },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      disabledForegroundColor: Colors.grey,
-                      shadowColor: Colors.transparent,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0),
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        if (matchingDocs.isNotEmpty &&
+                            index < matchingDocs.length) {
+                          _openFile(matchingDocs[index], context);
+                        } else {
+                          newDocument();
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        disabledForegroundColor: Colors.grey,
+                        shadowColor: Colors.transparent,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 16.0, horizontal: 20.0),
                       ),
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 16.0, horizontal: 20.0),
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Text(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Text(
                           docNecessaire,
                           textAlign: TextAlign.center,
                           style: const TextStyle(
@@ -242,11 +378,9 @@ class _DemarcheSelectedInterfaceState extends State<DemarcheSelectedInterface> {
                           ),
                         ),
                         const SizedBox(height: 5),
-                        // Conditional display based on whether matchingDocs has elements
-                        Text(
-                          matchingDocs.isNotEmpty
-                              ? matchingDocs[0]
-                                  .name // Display the name of the first document if available
+                          Text(
+                          (matchingDocs.isNotEmpty && index < matchingDocs.length)
+                              ? matchingDocs[index].name // Display the name of the first document if available
                               : "Ajouter un document", // Display this message if no documents are found
                           textAlign: TextAlign.center,
                           style: const TextStyle(
@@ -256,14 +390,15 @@ class _DemarcheSelectedInterfaceState extends State<DemarcheSelectedInterface> {
                         ),
                         const SizedBox(height: 5),
                         Icon(
-                          matchingDocs.isNotEmpty
+                          (matchingDocs.isNotEmpty && index < matchingDocs.length)
                               ? Icons.check_circle
                               : Icons
                                   .add, // Display a checkmark if documents are found, or a plus sign if not
                           color: Colors.blue,
                           size: 24,
                         ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 );
