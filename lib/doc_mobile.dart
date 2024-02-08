@@ -20,13 +20,17 @@ import 'package:docare/scanner_UI_mobile.dart'; // Pour scanner un document
 
 import 'package:docare/font_size.dart';
 
+// imports firebase
+import 'package:docare/services/database_service.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+
 class DocumentInterface extends StatefulWidget {
   @override
   _DocumentInterfaceState createState() => _DocumentInterfaceState();
 }
 
 class _DocumentInterfaceState extends State<DocumentInterface> {
-
   // Method to show dialog for new folder creation
   void showCreateFolderDialog(BuildContext context) {
     final TextEditingController folderNameController = TextEditingController();
@@ -54,7 +58,9 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
               onPressed: () {
                 String folderName = folderNameController
                     .text; // Get the folder name from the input
-                if (folderName.isEmpty) folderName = "Dossier sans titre"; // If the folder name is empty, set it to "Dossier sans titre"
+                if (folderName.isEmpty)
+                  folderName =
+                      "Dossier sans titre"; // If the folder name is empty, set it to "Dossier sans titre"
                 Folder newFolder = Folder(
                   id: Provider.of<User>(context, listen: false)
                       .folderList
@@ -68,7 +74,7 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
                   owner: Provider.of<User>(context,
                       listen: false), // Propriétaire = utilisateur actuel
                   sharedWith: [],
-                  );
+                );
                 folderName = ""; // Clear the folder name
                 refreshUI();
                 Navigator.of(context).pop(); // Close the dialog
@@ -86,9 +92,8 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          
-          title: Text('Supprimer le ${entity is Document ? 'document' : 'dossier'}'),
-          
+          title: Text(
+              'Supprimer le ${entity is Document ? 'document' : 'dossier'}'),
           actions: <Widget>[
             TextButton(
               child: const Text('Annuler'),
@@ -99,7 +104,8 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
             TextButton(
               child: const Text('Supprimer'),
               onPressed: () {
-                showDeleteEntityDialog(context, entity); // Appelle la méthode pour créer un nouveau dossier
+                showDeleteEntityDialog(context,
+                    entity); // Appelle la méthode pour créer un nouveau dossier
                 Navigator.of(context).pop(); // Close the dialog
               },
             ),
@@ -151,24 +157,19 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
   }
 
   void refreshUI() {
-  setState(() {
-    filteredEntity.clear();
-    filteredEntity.addAll(
-        Provider.of<User>(context, listen: false)
-            .folderList[indexFolder]
-            .folders);
-    filteredEntity.addAll(
-        Provider.of<User>(context, listen: false)
-            .folderList[indexFolder]
-            .files);
-  });
-}
-
+    setState(() {
+      filteredEntity.clear();
+      filteredEntity.addAll(Provider.of<User>(context, listen: false)
+          .folderList[indexFolder]
+          .folders);
+      filteredEntity.addAll(Provider.of<User>(context, listen: false)
+          .folderList[indexFolder]
+          .files);
+    });
+  }
 
   void newDocument() async {
-    // async pour pouvoir utiliser await
-    FilePickerResult? result =
-        await FilePicker.platform.pickFiles(
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
       withData: true, // Récupérer les données du fichier
       type: FileType.custom,
       allowedExtensions: [
@@ -181,31 +182,61 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
 
     if (result != null) {
       PlatformFile file = result.files.first;
+      // Determine the directory based on file type
+      String directory = file.extension == 'pdf' ? 'pdfs' : 'images';
+      String fileName =
+          '${DateTime.now().millisecondsSinceEpoch}.${file.extension}';
 
-      // Vérifiez si le fichier est une image
+      // Upload the document file to Firebase Storage
+      firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance
+          .ref()
+          .child('$directory/$fileName');
+
+      // Convert Uint8List to File
+      List<int> bytes = file.bytes!;
+      Uint8List byteList = Uint8List.fromList(bytes);
+
+      final tempDir = await getTemporaryDirectory();
+      File tempFile = File('${tempDir.path}/$fileName');
+      await tempFile.writeAsBytes(byteList);
+
+      await ref.putFile(tempFile);
+
+      // Get the download URL of the uploaded document
+      String downloadUrl = await ref.getDownloadURL();
+      print(downloadUrl);
+
+      Document doc = Document(
+          id: 0,
+          title: file.name,
+          fileType: file.extension.toString(),
+          path: downloadUrl,
+          tags: [],
+          creationDate: DateTime.now(),
+          ownerId: 2,
+          folder: Provider.of<User>(context, listen: false)
+              .folderList[indexFolder]);
+      Document_BDD doc_bdd = Document_BDD(
+          id: 2,
+          title: file.name,
+          fileType: file.extension.toString(),
+          path: downloadUrl,
+          tags: [],
+          creationDate: DateTime.now(),
+          ownerId: Provider.of<User>(context, listen: false).userId,
+          folderId: doc.folder.id);
+      DatabaseService().addDocument_bdd(doc_bdd);
+// Add your logic for handling different file types here
       if (['jpg', 'jpeg', 'png'].contains(file.extension)) {
-        // Convertir en Uint8List
-        Uint8List? fileBytes = file.bytes;
-        if (fileBytes != null) {
-          // Proceed with your logic
-          Widget image = Image.memory(fileBytes);
-
-          // Ajouter le document à la liste des documents de l'utilisateur
-          // TO DO:
-        } else {
-          // Handle the situation where bytes are not available
-          print('Error: File bytes are null');
-        }
+        // Proceed with your logic for images
       } else if (file.extension == 'pdf') {
-        // Faire de même pour les PDF
+        // Proceed with your logic for PDFs
       } else {
-        // Gérer les autres types de fichiers ici
-        print(
-            'Type de fichier non supporté pour la visualisation directe.');
+        // Handle other file types
       }
     } else {
-      // L'utilisateur a annulé la sélection de fichier
-      print('Aucun fichier sélectionné.');
+      // Handle the case where no file is selected
+      print('No file selected.');
     }
   }
 
@@ -241,7 +272,10 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
                   borderSide: BorderSide.none,
                 ),
               ),
-              onChanged: (value) => searchDocuments(value, Provider.of<User>(context, listen: false).folderList[indexFolder]), // Recherche
+              onChanged: (value) => searchDocuments(
+                  value,
+                  Provider.of<User>(context, listen: false)
+                      .folderList[indexFolder]), // Recherche
             ),
           ),
           const SizedBox(width: 16.0),
@@ -250,23 +284,24 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
               constraints: BoxConstraints.tightFor(width: buttonWidth),
               child: PopupMenuButton<String>(
                 onSelected: (String value) async {
-                  if(value == 'scan_document') {
-                    List<String> pictures = await CunningDocumentScanner.getPictures(true) ?? [];
+                  if (value == 'scan_document') {
+                    List<String> pictures =
+                        await CunningDocumentScanner.getPictures(true) ?? [];
                     if (pictures.isNotEmpty && mounted) {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => DocumentScannerUI(pictures: pictures),
+                          builder: (context) =>
+                              DocumentScannerUI(pictures: pictures),
                         ),
                       );
                     }
-                    
                   } else if (value == 'import_document') {
                     newDocument(); // Appelle la méthode pour créer un nouveau document
-
                   } else if (value == 'new_folder') {
-                    showCreateFolderDialog(context); // Appelle la méthode pour créer un nouveau dossier
-                  } 
+                    showCreateFolderDialog(
+                        context); // Appelle la méthode pour créer un nouveau dossier
+                  }
                 },
                 itemBuilder: (BuildContext context) {
                   return <PopupMenuEntry<String>>[
@@ -282,7 +317,6 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
                       value: 'new_folder',
                       child: Text('Nouveau dossier'),
                     ),
-                    
                   ];
                 },
                 child: Container(
@@ -291,19 +325,23 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
                     borderRadius: BorderRadius.circular(4.0), // Border radius
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 20.0),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12.0, vertical: 20.0),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center, // This will center the icon horizontally
-                      crossAxisAlignment: CrossAxisAlignment.center, // This will center the icon vertically
+                      mainAxisAlignment: MainAxisAlignment
+                          .center, // This will center the icon horizontally
+                      crossAxisAlignment: CrossAxisAlignment
+                          .center, // This will center the icon vertically
                       children: [
                         Align(
-                          alignment: Alignment.center,
-                          child: screenWidth > 700
-                        ? Text('Nouveau') // Si l'écran est large (texte)
-                        : Icon(Icons.add, color: ColorSettings.backgroundColor) // Si l'écran est petit (icone)
-                        ),
-                        
-                        
+                            alignment: Alignment.center,
+                            child: screenWidth > 700
+                                ? Text(
+                                    'Nouveau') // Si l'écran est large (texte)
+                                : Icon(Icons.add,
+                                    color: ColorSettings
+                                        .backgroundColor) // Si l'écran est petit (icone)
+                            ),
                       ],
                     ),
                   ),
@@ -316,8 +354,10 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
     );
   }
 
-  TextEditingController searchController = TextEditingController(); // Contrôleur pour la barre de recherche
-  List<FileSystemEntity> filteredEntity = []; // Liste des dossiers/documents filtrés
+  TextEditingController searchController =
+      TextEditingController(); // Contrôleur pour la barre de recherche
+  List<FileSystemEntity> filteredEntity =
+      []; // Liste des dossiers/documents filtrés
   int idFolder = 0; // Index du dossier actuel - 0 = /home (ou root)
   int indexFolder = 0;
   List<String> _pictures = [];
@@ -326,16 +366,29 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
   void initState() {
     // Méthode appelée au démarrage de l'application
     super.initState();
-    
-    for (int i = 0; i < Provider.of<User>(context, listen: false).folderList[0].folders.length; i++) {
-      filteredEntity.add(Provider.of<User>(context, listen: false).folderList[0].folders[i]);
+
+    for (int i = 0;
+        i <
+            Provider.of<User>(context, listen: false)
+                .folderList[0]
+                .folders
+                .length;
+        i++) {
+      filteredEntity.add(
+          Provider.of<User>(context, listen: false).folderList[0].folders[i]);
     }
-    for (int i = 0; i < Provider.of<User>(context, listen: false).folderList[0].files.length; i++) {
-      filteredEntity.add(Provider.of<User>(context, listen: false).folderList[0].files[i]);
+    for (int i = 0;
+        i <
+            Provider.of<User>(context, listen: false)
+                .folderList[0]
+                .files
+                .length;
+        i++) {
+      filteredEntity.add(
+          Provider.of<User>(context, listen: false).folderList[0].files[i]);
     }
   }
 
- 
   // Méthode pour rechercher un document
   void searchDocuments(String query, Folder folder) {
     List<FileSystemEntity> entity = [];
@@ -352,9 +405,18 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
       });
     } else {
       setState(() {
-        filteredEntity = entity.where((doc) => doc.name.toLowerCase().contains(query.toLowerCase())).toList();
+        filteredEntity = entity
+            .where(
+                (doc) => doc.name.toLowerCase().contains(query.toLowerCase()))
+            .toList();
         // filtre aussi dans la liste des tags
-        filteredEntity = filteredEntity + entity.where((doc) => (doc is Document) && doc.tags.any((tag) => tag.toLowerCase().contains(query.toLowerCase()))).toList();
+        filteredEntity = filteredEntity +
+            entity
+                .where((doc) =>
+                    (doc is Document) &&
+                    doc.tags.any((tag) =>
+                        tag.toLowerCase().contains(query.toLowerCase())))
+                .toList();
         // on enleve les doublons (si un document est trouvé dans les deux listes)
         filteredEntity = filteredEntity.toSet().toList();
       });
@@ -363,9 +425,10 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
 
   // Méthode pour trouver l'index d'un dossier dans la liste des dossiers de l'utilisateur
   int findFolderIndexWithId(int id) {
-
-    for(int i = 0; i < Provider.of<User>(context, listen: false).folderList.length; i++) {
-      if(Provider.of<User>(context, listen: false).folderList[i].id == id) {
+    for (int i = 0;
+        i < Provider.of<User>(context, listen: false).folderList.length;
+        i++) {
+      if (Provider.of<User>(context, listen: false).folderList[i].id == id) {
         return i;
       }
     }
@@ -375,11 +438,15 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
   String getFolderPath() {
     // Construit le chemin du dossier actuel pour l'afficher
     String path = "";
-    Folder currentFolder = Provider.of<User>(context, listen: false).folderList[indexFolder];
+    Folder currentFolder =
+        Provider.of<User>(context, listen: false).folderList[indexFolder];
     int i = indexFolder;
-    while(currentFolder.parentId >= 0) { // Tant que le dossier actuel n'est pas /home 
-      path = "${Provider.of<User>(context, listen: false).folderList[i].name}/$path"; // Remonte d'un niveau
-      currentFolder = Provider.of<User>(context, listen: false).folderList[findFolderIndexWithId(currentFolder.parentId)];
+    while (currentFolder.parentId >= 0) {
+      // Tant que le dossier actuel n'est pas /home
+      path =
+          "${Provider.of<User>(context, listen: false).folderList[i].name}/$path"; // Remonte d'un niveau
+      currentFolder = Provider.of<User>(context, listen: false)
+          .folderList[findFolderIndexWithId(currentFolder.parentId)];
       i = findFolderIndexWithId(currentFolder.id);
     }
     path = "/home/$path"; // Ajoute /home au début du chemin
@@ -415,10 +482,8 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
-
     String path = getFolderPath();
     return Scaffold(
       body: Column(
@@ -457,33 +522,43 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
               ],
             ),
           ),
-          buildTopBar(context), // Barre de recherche (voir la méthode buildTopBar)
+          buildTopBar(
+              context), // Barre de recherche (voir la méthode buildTopBar)
           Padding(
             padding: const EdgeInsets.all(4.0),
             child: InkWell(
-                  // InkWell pour rendre l'image cliquable
-                  onTap: () {
-                    Folder folder = Provider.of<User>(context, listen: false).folderList[indexFolder];
-                    int parentdIndexFolder = findFolderIndexWithId(folder.parentId); // Change the current folder index
-                    if(parentdIndexFolder < 0) parentdIndexFolder = 0; 
-                    setState(() {
-                          indexFolder = parentdIndexFolder;
-                          filteredEntity.clear(); // Clear the list of documents
-                          searchController.clear(); // Clear the search bar
-                          // Add folders and files from the selected folder to filteredEntity
-                          filteredEntity.addAll(Provider.of<User>(context, listen: false).folderList[indexFolder].folders);
-                          filteredEntity.addAll(Provider.of<User>(context, listen: false).folderList[indexFolder].files);
-                        });
-                  },
-                  child: Text(
-                    path, // Affiche le chemin du dossier actuel
-                    style: const TextStyle(fontSize: 14, color: Colors.black),
-                  ),
-                ),
+              // InkWell pour rendre l'image cliquable
+              onTap: () {
+                Folder folder = Provider.of<User>(context, listen: false)
+                    .folderList[indexFolder];
+                int parentdIndexFolder = findFolderIndexWithId(
+                    folder.parentId); // Change the current folder index
+                if (parentdIndexFolder < 0) parentdIndexFolder = 0;
+                setState(() {
+                  indexFolder = parentdIndexFolder;
+                  filteredEntity.clear(); // Clear the list of documents
+                  searchController.clear(); // Clear the search bar
+                  // Add folders and files from the selected folder to filteredEntity
+                  filteredEntity.addAll(
+                      Provider.of<User>(context, listen: false)
+                          .folderList[indexFolder]
+                          .folders);
+                  filteredEntity.addAll(
+                      Provider.of<User>(context, listen: false)
+                          .folderList[indexFolder]
+                          .files);
+                });
+              },
+              child: Text(
+                path, // Affiche le chemin du dossier actuel
+                style: const TextStyle(fontSize: 14, color: Colors.black),
+              ),
+            ),
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: filteredEntity.isEmpty // Si aucun document n'est trouvé dans la recherche ou si aucun document n'a été ajouté
+            child: filteredEntity
+                    .isEmpty // Si aucun document n'est trouvé dans la recherche ou si aucun document n'a été ajouté
                 ? Text(
                     "Aucun document trouvé",
                     style: TextStyle(fontSize: 20, color: Colors.grey),
@@ -497,76 +572,31 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
             child: GridView.builder(
               padding: const EdgeInsets.all(4.0),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: (MediaQuery.of(context).size.width / 120).floor(), // le nobre d'éléments par ligne (adapté selon la taille de l'écran)
+                crossAxisCount: (MediaQuery.of(context).size.width / 120)
+                    .floor(), // le nobre d'éléments par ligne (adapté selon la taille de l'écran)
                 crossAxisSpacing: 10.0, // Espace horizontal entre les éléments
                 mainAxisSpacing: 10.0, // Espace vertical entre les éléments
               ),
-              itemCount: filteredEntity.length, // Remplacer par le nombre réel de documents
+              itemCount: filteredEntity
+                  .length, // Remplacer par le nombre réel de documents
               itemBuilder: (context, index) {
                 return Card(
-                  clipBehavior: Clip.antiAlias,
-                    child: Builder(  // Use Builder to get the correct context for the grid item
+                    clipBehavior: Clip.antiAlias,
+                    child: Builder(
+                      // Use Builder to get the correct context for the grid item
                       builder: (itemContext) => InkWell(
-                      onTap: () {
-                        if (filteredEntity[index].type == true) {
-                          // Si c'est un dossier
-                          Folder folder = filteredEntity[index] as Folder; // Cast en Folder
+                        onTap: () {
+                          if (filteredEntity[index].type == true) {
+                            // Si c'est un dossier
+                            Folder folder = filteredEntity[index]
+                                as Folder; // Cast en Folder
 
-                          setState(() {
-                            indexFolder = findFolderIndexWithId(folder.id); // Change the current folder index
-                            filteredEntity.clear(); // Clear the list of documents
-                            searchController.clear(); // Clear the search bar
-                            // Add folders and files from the selected folder to filteredEntity
-                            filteredEntity.addAll(Provider.of<User>(context, listen: false).folderList[indexFolder].folders);
-                            filteredEntity.addAll(Provider.of<User>(context, listen: false).folderList[indexFolder].files);
-                          });
-
-                        } else {
-                          // Si c'est un document
-                          Document document = filteredEntity[index] as Document;
-                          _openFile(document, context);
-                        }
-                      },
-                      onLongPress: () { // Lorsque l'utilisateur appuie longuement sur un document/dossier
-                        final RenderBox itemBox = itemContext.findRenderObject() as RenderBox; 
-                        final Offset position = itemBox.localToGlobal(Offset.zero);
-                        final Size size = itemBox.size; // gets the size of the element
-
-                        // Calculate the bottom left position of the element
-                        final Offset bottomLeft = position + Offset(0, size.height);
-
-                        showMenu(
-                          context: context,
-                          position: RelativeRect.fromLTRB(
-                            bottomLeft.dx, // Left position
-                            bottomLeft.dy, // Top position, which is actually the bottom of the element
-                            bottomLeft.dx, // Right position
-                            0, // Bottom position
-                          ),
-                          items: [
-                            const PopupMenuItem<String>(
-                              value: 'rename',
-                              child: Text('Renommer'),
-                            ),
-                            const PopupMenuItem<String>(
-                              value: 'delete',
-                              child: Text('Supprimer'),
-                            ),
-                          ],
-                        ).then((value) {
-                          if (value == 'rename') {
-                            if(filteredEntity[index] is Document) {
-                              Document document = filteredEntity[index] as Document; // Cast en Document
-                              document.showRenameDocumentDialog(context, () { // Affiche la boîte de dialogue pour renommer le document
-                                  refreshUI();
-                                }); 
-                            }
-                            else {
-                              Folder folder = filteredEntity[index] as Folder; // Cast en Folder
-                              folder.showRenameFolderDialog(context); // Affiche la boîte de dialogue pour renommer le dossier
-                            }
                             setState(() {
-                              filteredEntity.clear(); // Clear the list of documents
+                              indexFolder = findFolderIndexWithId(
+                                  folder.id); // Change the current folder index
+                              filteredEntity
+                                  .clear(); // Clear the list of documents
+                              searchController.clear(); // Clear the search bar
                               // Add folders and files from the selected folder to filteredEntity
                               filteredEntity.addAll(
                                   Provider.of<User>(context, listen: false)
@@ -577,52 +607,128 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
                                       .folderList[indexFolder]
                                       .files);
                             });
-                          } else if (value == 'delete') {
-                            if(filteredEntity[index] is Folder) {
-                              Folder folder = filteredEntity[index] as Folder;
-                              Provider.of<User>(context, listen: false).removeFolder(folder.id); // Supprime le dossier
-
-                              Provider.of<User>(context, listen: false).folderList[indexFolder].removeFolder(folder); // Supprime le dossier de la liste des dossiers du dossier parent (dossier actuel
-
-                              
-                            } else {
-                              Document document = filteredEntity[index] as Document;
-                              Provider.of<User>(context, listen: false).removeDocument(document); // Supprime le document/dossier
-                              Provider.of<User>(context, listen: false).folderList[indexFolder].removeFile(document); // Supprime le document/dossier de la liste des documents/dossiers du dossier parent (dossier actuel)
-                            }
-                            refreshUI();
+                          } else {
+                            // Si c'est un document
+                            Document document =
+                                filteredEntity[index] as Document;
+                            _openFile(document, context);
                           }
-                        });
-                      },
-                      
-                      child: GridTile(
-                        footer: Container(
-                          padding: const EdgeInsets.all(4.0),
-                          color: ColorSettings.backgroundColor,
-                          child: Text(
-                            filteredEntity[index].name,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(color: Colors.white),
-                          ),
-                        ),
-                        child: filteredEntity[index] is Document
-                            ? (filteredEntity[index] as Document).fileType == 'img'
-                                ? Image.asset(
-                                    (filteredEntity[index] as Document).path, // Display the image for documents
-                                    fit: BoxFit.cover,
-                                  )
+                        },
+                        onLongPress: () {
+                          // Lorsque l'utilisateur appuie longuement sur un document/dossier
+                          final RenderBox itemBox =
+                              itemContext.findRenderObject() as RenderBox;
+                          final Offset position =
+                              itemBox.localToGlobal(Offset.zero);
+                          final Size size =
+                              itemBox.size; // gets the size of the element
+
+                          // Calculate the bottom left position of the element
+                          final Offset bottomLeft =
+                              position + Offset(0, size.height);
+
+                          showMenu(
+                            context: context,
+                            position: RelativeRect.fromLTRB(
+                              bottomLeft.dx, // Left position
+                              bottomLeft
+                                  .dy, // Top position, which is actually the bottom of the element
+                              bottomLeft.dx, // Right position
+                              0, // Bottom position
+                            ),
+                            items: [
+                              const PopupMenuItem<String>(
+                                value: 'rename',
+                                child: Text('Renommer'),
+                              ),
+                              const PopupMenuItem<String>(
+                                value: 'delete',
+                                child: Text('Supprimer'),
+                              ),
+                            ],
+                          ).then((value) {
+                            if (value == 'rename') {
+                              if (filteredEntity[index] is Document) {
+                                Document document = filteredEntity[index]
+                                    as Document; // Cast en Document
+                                document.showRenameDocumentDialog(context, () {
+                                  // Affiche la boîte de dialogue pour renommer le document
+                                  refreshUI();
+                                });
+                              } else {
+                                Folder folder = filteredEntity[index]
+                                    as Folder; // Cast en Folder
+                                folder.showRenameFolderDialog(
+                                    context); // Affiche la boîte de dialogue pour renommer le dossier
+                              }
+                              setState(() {
+                                filteredEntity
+                                    .clear(); // Clear the list of documents
+                                // Add folders and files from the selected folder to filteredEntity
+                                filteredEntity.addAll(
+                                    Provider.of<User>(context, listen: false)
+                                        .folderList[indexFolder]
+                                        .folders);
+                                filteredEntity.addAll(
+                                    Provider.of<User>(context, listen: false)
+                                        .folderList[indexFolder]
+                                        .files);
+                              });
+                            } else if (value == 'delete') {
+                              if (filteredEntity[index] is Folder) {
+                                Folder folder = filteredEntity[index] as Folder;
+                                Provider.of<User>(context, listen: false)
+                                    .removeFolder(
+                                        folder.id); // Supprime le dossier
+
+                                Provider.of<User>(context, listen: false)
+                                    .folderList[indexFolder]
+                                    .removeFolder(
+                                        folder); // Supprime le dossier de la liste des dossiers du dossier parent (dossier actuel
+                              } else {
+                                Document document =
+                                    filteredEntity[index] as Document;
+                                Provider.of<User>(context, listen: false)
+                                    .removeDocument(
+                                        document); // Supprime le document/dossier
+                                Provider.of<User>(context, listen: false)
+                                    .folderList[indexFolder]
+                                    .removeFile(
+                                        document); // Supprime le document/dossier de la liste des documents/dossiers du dossier parent (dossier actuel)
+                              }
+                              refreshUI();
+                            }
+                          });
+                        },
+                        child: GridTile(
+                            footer: Container(
+                              padding: const EdgeInsets.all(4.0),
+                              color: ColorSettings.backgroundColor,
+                              child: Text(
+                                filteredEntity[index].name,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                            ),
+                            child: filteredEntity[index] is Document
+                                ? (filteredEntity[index] as Document)
+                                            .fileType ==
+                                        'img'
+                                    ? Image.network(
+                                        (filteredEntity[index] as Document)
+                                            .path, // Display the image for documents
+                                        fit: BoxFit.cover,
+                                      )
+                                    : Image.asset(
+                                        'assets/images/pdf_icon.jpeg',
+                                        fit: BoxFit.cover,
+                                      )
                                 : Image.asset(
-                                    'assets/images/pdf_icon.jpeg', 
-                                    fit: BoxFit.cover,
-                                  )
-                            : Image.asset(
                                     'assets/images/folder.png', // Folder icon for folders
                                     fit: BoxFit.cover,
-                                  )
+                                  )),
                       ),
-                    ),
-                  )
-                );
+                    ));
               },
             ),
           ),

@@ -23,8 +23,21 @@ import 'package:flutter/foundation.dart';
 import 'package:docare/scanner_UI_mobile.dart'; // Charge la version mobile (dummy)
 
 import 'package:docare/font_size.dart'; // Pour utiliser la classe FontSizeSettings
+import 'package:docare/firebase_options.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 
-void main() {
+
+void main() async {
+
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  FirebaseFirestore.instance.settings = const Settings(
+    persistenceEnabled: true
+  );
+
   // Create user
   User currentUser = User(
     userId: 1,
@@ -50,7 +63,7 @@ void main() {
     id: 1,
     title: "Carte d'identité",
     fileType: 'img',
-    path: 'assets/documents/CNI_example.png',
+    path: 'https://firebasestorage.googleapis.com/v0/b/docare-a94a9.appspot.com/o/images%2F1707408283003.jpeg?alt=media&token=1402bb30-12d1-4cd0-b455-847a15460513',
     tags: ["document d'identité"],
     creationDate: DateTime.now(),
     ownerId: currentUser.userId, // id de l'utilisateur propriétaire du document
@@ -60,7 +73,7 @@ void main() {
     id: 1,
     title: "annale d'IAM",
     fileType: 'pdf',
-    path: 'assets/documents/iam_DS-3.pdf',
+    path: 'https://firebasestorage.googleapis.com/v0/b/docare-a94a9.appspot.com/o/images%2F1707408283003.jpeg?alt=media&token=1402bb30-12d1-4cd0-b455-847a15460513',
     tags: ["personnel"],
     creationDate: DateTime.now(),
     ownerId: currentUser.userId, // id de l'utilisateur propriétaire du document

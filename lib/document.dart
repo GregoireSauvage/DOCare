@@ -39,6 +39,29 @@ class Document extends FileSystemEntity {
     required this.folder,
   }) : super(name: title, type: false);
   
+  Document.fromJason(Map<String, Object?> json) : this(
+    id: json['id']! as int,
+    title: json['title']! as String,
+    fileType: json['fileType']! as String,
+    path: json['path']! as String,
+    tags: json['tags']! as List<String>,
+    creationDate: json['creationDate']! as DateTime,
+    ownerId: json['ownerId']! as int,
+    folder: json['folder']! as Folder,
+  );
+
+  Map<String, Object?> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'fileType': fileType,
+      'path': path,
+      'tags': tags,
+      'creationDate': creationDate,
+      'ownerId': ownerId,
+      'folder': folder,
+    };
+  }
 
   // Getters
   int getId() {return id;}
@@ -115,26 +138,48 @@ class Document extends FileSystemEntity {
 
 
 class Document_BDD {
-  int id=0;
-  String title="";
-  String fileType="";
+  int id;
+  String title;
+  String fileType;
   String path="";  // chemin du fichier
-  List<String> tags=[]; // liste des tags
-  DateTime creationDate=DateTime.now();
-  int ownerId=0; // id de l'utilisateur propriétaire du document
-  int folderId=0; // id du dossier dans lequel se trouve le document
+  List<String> tags; // liste des tags
+  DateTime creationDate;
+  int ownerId; // id de l'utilisateur propriétaire du document
+  int folderId; // id du dossier dans lequel se trouve le document
 
-  
+
   Document_BDD({
-    required Document document,
-  }) {
-    id = document.id;
-    title = document.title;
-    fileType = document.fileType;
-    path = document.path;
-    tags = document.tags;
-    creationDate = document.creationDate;
-    ownerId = document.ownerId;
-    folderId = document.folder.id;
-  } 
+    required this.id,
+    required this.title,
+    required this.fileType,
+    required this.path,
+    required this.tags,
+    required this.creationDate,
+    required this.ownerId,
+    required this.folderId,
+  });
+
+  Document_BDD.fromJason(Map<String, Object?> json) : this(
+    id: json['id']! as int,
+    title: json['title']! as String,
+    fileType: json['fileType']! as String,
+    path: json['path']! as String,
+    tags: json['tags']! as List<String>,
+    creationDate: json['creationDate']! as DateTime,
+    ownerId: json['ownerId']! as int,
+    folderId: json['folder']! as int,
+  );
+
+  Map<String, Object?> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'fileType': fileType,
+      'path': path,
+      'tags': tags,
+      'creationDate': creationDate,
+      'ownerId': ownerId,
+      'folder': folderId,
+    };
+  }
 }

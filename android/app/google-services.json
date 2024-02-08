@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "314764495047",
+    "project_id": "docare-a94a9",
+    "storage_bucket": "docare-a94a9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:314764495047:android:e19b532ede6c84e56116e2",
+        "android_client_info": {
+          "package_name": "com.example.docare"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD8JPHUWN5moy4xvSmVNIBhXxaveuA1CMI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
