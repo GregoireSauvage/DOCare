@@ -42,7 +42,6 @@ class MenuActions with ChangeNotifier {
                   folders: [], 
                   files: [],
                   owner: Provider.of<User>(context, listen: false), // Propriétaire = utilisateur actuel
-                  sharedWith: [],
                 );
                 folderName = ""; // Clear the folder name
                 Navigator.of(context).pop(); // Close the dialog

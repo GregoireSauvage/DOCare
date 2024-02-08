@@ -171,7 +171,6 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
                   files: [],
                   owner: Provider.of<User>(context,
                       listen: false), // Propriétaire = utilisateur actuel
-                  sharedWith: [],
                 );
                 folderName = ""; // Clear the folder name
                 updateUI();

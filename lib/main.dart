@@ -55,61 +55,17 @@ void main() async {
     folders: [],
     files: [],
     owner:
-        currentUser, // utilisateur propriétaire du dossier (automatiquement ajouté à la liste des dossiers de l'utilisateur)
-    sharedWith: [],
-  );
+      currentUser, // utilisateur propriétaire du dossier (automatiquement ajouté à la liste des dossiers de l'utilisateur)
+    );
 
-  Document CNI = Document(
+  
+ Folder(
     id: 1,
-    title: "Carte d'identité",
-    fileType: 'img',
-    path: 'https://firebasestorage.googleapis.com/v0/b/docare-a94a9.appspot.com/o/images%2F1707408283003.jpeg?alt=media&token=1402bb30-12d1-4cd0-b455-847a15460513',
-    tags: ["document d'identité"],
-    creationDate: DateTime.now(),
-    ownerId: currentUser.userId, // id de l'utilisateur propriétaire du document
-    folder: currentUser.folderList[0], // dossier racine
-  );
-  Document annaleIAM = Document(
-    id: 1,
-    title: "annale d'IAM",
-    fileType: 'pdf',
-    path: 'https://firebasestorage.googleapis.com/v0/b/docare-a94a9.appspot.com/o/images%2F1707408283003.jpeg?alt=media&token=1402bb30-12d1-4cd0-b455-847a15460513',
-    tags: ["personnel"],
-    creationDate: DateTime.now(),
-    ownerId: currentUser.userId, // id de l'utilisateur propriétaire du document
-    folder: currentUser.folderList[0], // dossier racine
-  );
-
-  Folder folder1 = Folder(
-    id: 1,
-    name: 'Dossier 1',
-    parentId: 0, // dossier parent = racine (automatiquement ajouté au parent)
-    folders: [],
-    files: [],
-    owner: currentUser,
-    sharedWith: [],
-  );
-  folder1.addFile(CNI); // Ajout du document CNI au dossier 1
-
-  Folder folder2 = Folder(
-    id: 2,
-    name: 'Dossier 2',
-    parentId: 1, // dossier parent = racine (automatiquement ajouté au parent)
-    folders: [],
-    files: [],
-    owner: currentUser,
-    sharedWith: [],
-  );
-  folder2.addFile(annaleIAM); // Ajout du document annaleIAM au dossier 2
-
-  Folder examensMedicaux = Folder(
-    id: 3,
     name: 'Examens médicaux',
     parentId: 0, // dossier parent = racine (automatiquement ajouté au parent)
     folders: [],
     files: [],
     owner: currentUser,
-    sharedWith: [],
   );
 
   runApp(

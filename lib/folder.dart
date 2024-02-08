@@ -13,7 +13,6 @@ class Folder extends FileSystemEntity {
   List<Folder> folders;
   List<Document> files;
   User owner;           // full access
-  List <User> sharedWith; // read only (?)
   
 
   // Constructor
@@ -24,7 +23,6 @@ class Folder extends FileSystemEntity {
     required this.folders,
     required this.files,
     required this.owner,
-    required this.sharedWith,
   }) : super(name: name, type: true) {
     
     if(parentId >= 0) {
@@ -55,15 +53,6 @@ class Folder extends FileSystemEntity {
     files.remove(file);
   }
 
-  // Add a user to the list of users with read only access
-  void addUser(User user) {
-    sharedWith.add(user);
-  }
-  // Remove a user from the list of users with read only access
-  void removeUser(User user) {
-    sharedWith.remove(user);
-  }
-
   // Getters
   int getId() {return id;}
   String getName() {return name;}
@@ -71,7 +60,6 @@ class Folder extends FileSystemEntity {
   List<Folder> getFolders() {return folders;}
   List<Document> getFiles() {return files;}
   User getOwnerId() {return owner;}
-  List <User> getSharedWith() {return sharedWith;}
 
   // rename folder
   void rename(String newName) {
@@ -115,5 +103,46 @@ class Folder extends FileSystemEntity {
         );
       },
     );
+  }
+  
+}
+
+
+class Folder_BDD {
+  int id;
+  String name;
+  int parentId;
+  List<int> foldersId;
+  List<int> filesId;
+  int ownerId;           // full access
+
+
+  Folder_BDD({
+    required this.id,
+    required this.name,
+    required this.parentId,
+    required this.foldersId,
+    required this.filesId,
+    required this.ownerId,
+  });
+
+  Folder_BDD.fromJason(Map<String, Object?> json) : this(
+    id: json['id']! as int,
+    name: json['name']! as String,
+    parentId: json['parentId']! as int,
+    foldersId: json['foldersId']! as List<int>,
+    filesId: json['filesId']! as List<int>,
+    ownerId: json['ownerId']! as int,
+  );
+
+  Map<String, Object?> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'parentId': parentId,
+      'foldersId': foldersId,
+      'filesId': filesId,
+      'ownerId': ownerId,
+    };
   }
 }

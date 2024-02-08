@@ -10,7 +10,6 @@ class Document extends FileSystemEntity {
   String fileType;
   String path;  // chemin du fichier
   List<String> tags; // liste des tags
-  DateTime creationDate;
   int ownerId; // id de l'utilisateur propriétaire du document
   Folder folder; // id du dossier dans lequel se trouve le document
 
@@ -20,7 +19,6 @@ class Document extends FileSystemEntity {
     required this.fileType,
     required this.path,
     required this.tags,
-    required this.creationDate,
     required this.ownerId,
     required this.folder,
   
@@ -34,7 +32,6 @@ class Document extends FileSystemEntity {
     required this.fileType,
     required this.path,
     required this.tags,
-    required this.creationDate,
     required this.ownerId,
     required this.folder,
   }) : super(name: title, type: false);
@@ -45,7 +42,6 @@ class Document extends FileSystemEntity {
     fileType: json['fileType']! as String,
     path: json['path']! as String,
     tags: json['tags']! as List<String>,
-    creationDate: json['creationDate']! as DateTime,
     ownerId: json['ownerId']! as int,
     folder: json['folder']! as Folder,
   );
@@ -57,7 +53,6 @@ class Document extends FileSystemEntity {
       'fileType': fileType,
       'path': path,
       'tags': tags,
-      'creationDate': creationDate,
       'ownerId': ownerId,
       'folder': folder,
     };
@@ -69,7 +64,6 @@ class Document extends FileSystemEntity {
   String getFileType() {return fileType;}
   String getPath() {return path;}
   List<String> getTags() {return tags;}
-  DateTime getCreationDate() {return creationDate;}
   int getOwnerId() {return ownerId;}
   Folder getFolderId() {return folder;}
 
@@ -143,7 +137,6 @@ class Document_BDD {
   String fileType;
   String path="";  // chemin du fichier
   List<String> tags; // liste des tags
-  DateTime creationDate;
   int ownerId; // id de l'utilisateur propriétaire du document
   int folderId; // id du dossier dans lequel se trouve le document
 
@@ -154,21 +147,20 @@ class Document_BDD {
     required this.fileType,
     required this.path,
     required this.tags,
-    required this.creationDate,
     required this.ownerId,
     required this.folderId,
   });
 
-  Document_BDD.fromJason(Map<String, Object?> json) : this(
-    id: json['id']! as int,
-    title: json['title']! as String,
-    fileType: json['fileType']! as String,
-    path: json['path']! as String,
-    tags: json['tags']! as List<String>,
-    creationDate: json['creationDate']! as DateTime,
-    ownerId: json['ownerId']! as int,
-    folderId: json['folder']! as int,
+  Document_BDD.fromJason(Map<String, dynamic> json) : this(
+    id: json['id'] as int? ?? 0,
+    title: json['title'] as String? ?? '',
+    fileType: json['fileType'] as String? ?? '',
+    path: json['path'] as String? ?? '',
+    tags: (json['tags'] as List<dynamic>?)?.map((item) => item as String).toList() ?? [],
+    ownerId: json['ownerId'] as int? ?? 0,
+    folderId: json['folder'] is int ? json['folder'] as int : int.tryParse(json['folder'] as String? ?? '') ?? 0,
   );
+
 
   Map<String, Object?> toJson() {
     return {
@@ -177,7 +169,6 @@ class Document_BDD {
       'fileType': fileType,
       'path': path,
       'tags': tags,
-      'creationDate': creationDate,
       'ownerId': ownerId,
       'folder': folderId,
     };

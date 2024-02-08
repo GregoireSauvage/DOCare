@@ -19,7 +19,7 @@ import 'package:cunning_document_scanner/cunning_document_scanner.dart'; // Pour
 import 'package:docare/scanner_UI_mobile.dart'; // Pour scanner un document
 
 import 'package:docare/font_size.dart';
-
+import 'package:http/http.dart' as http;
 // imports firebase
 import 'package:docare/services/database_service.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -73,7 +73,6 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
                   files: [],
                   owner: Provider.of<User>(context,
                       listen: false), // Propriétaire = utilisateur actuel
-                  sharedWith: [],
                 );
                 folderName = ""; // Clear the folder name
                 refreshUI();
@@ -119,22 +118,36 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
   void _openFile(Document file, BuildContext context) async {
     if (file.fileType == 'pdf') {
       // Si le document est un PDF
-      final byteData = await rootBundle.load(file.path);
-      final tempDir = await getTemporaryDirectory();
-      final fileName = file.path.split('/').last;
-      final tempFile = File('${tempDir.path}/$fileName');
-      await tempFile.writeAsBytes(
-          byteData.buffer
-              .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes),
-          flush: true);
+      try {
+        // Assuming `file.path` is a URL to the PDF
+        final response = await http.get(Uri.parse(file.path));
 
-      final result = await OpenFilex.open(tempFile.path);
+        if (response.statusCode == 200) {
+          final tempDir = await getTemporaryDirectory();
+          final fileName = file.path.split('/').last;
+          final tempFile = File('${tempDir.path}/$fileName');
 
-      // If the PDF couldn't be opened, show an error.
-      if (result.type != ResultType.done) {
+          // Write the bytes of the response to a file
+          await tempFile.writeAsBytes(response.bodyBytes, flush: true);
+
+          // Open the file with any PDF reader
+          final result = await OpenFilex.open(tempFile.path);
+
+          // If the PDF couldn't be opened, show an error.
+          if (result.type != ResultType.done) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text("Failed to open the file: ${result.message}"),
+              ),
+            );
+          }
+        } else {
+          throw Exception('Failed to load the PDF file');
+        }
+      } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text("Failed to open the file: ${result.message}"),
+            content: Text("Error: $e"),
           ),
         );
       }
@@ -144,7 +157,7 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
         context: context,
         builder: (context) => AlertDialog(
           content:
-              Image.asset(file.path), // Assuming `path` is a valid asset path
+              Image.network(file.path), // Assuming `path` is a valid asset path
           actions: <Widget>[
             TextButton(
               child: const Text('Fermer'),
@@ -157,6 +170,7 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
   }
 
   void refreshUI() {
+    initBDDListener();
     setState(() {
       filteredEntity.clear();
       filteredEntity.addAll(Provider.of<User>(context, listen: false)
@@ -165,6 +179,8 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
       filteredEntity.addAll(Provider.of<User>(context, listen: false)
           .folderList[indexFolder]
           .files);
+
+      // print all the documents of the user
     });
   }
 
@@ -205,26 +221,32 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
       // Get the download URL of the uploaded document
       String downloadUrl = await ref.getDownloadURL();
       print(downloadUrl);
+      String type = "";
+      if(file.extension.toString() == 'pdf') {
+        type = 'pdf';
+      }
+      else {
+        type = 'img';
+      }
 
       Document doc = Document(
           id: 0,
           title: file.name,
-          fileType: file.extension.toString(),
+          fileType: type,
           path: downloadUrl,
           tags: [],
-          creationDate: DateTime.now(),
           ownerId: 2,
           folder: Provider.of<User>(context, listen: false)
               .folderList[indexFolder]);
       Document_BDD doc_bdd = Document_BDD(
           id: 2,
           title: file.name,
-          fileType: file.extension.toString(),
+          fileType: type,
           path: downloadUrl,
           tags: [],
-          creationDate: DateTime.now(),
           ownerId: Provider.of<User>(context, listen: false).userId,
           folderId: doc.folder.id);
+
       DatabaseService().addDocument_bdd(doc_bdd);
 // Add your logic for handling different file types here
       if (['jpg', 'jpeg', 'png'].contains(file.extension)) {
@@ -364,8 +386,9 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
 
   @override
   void initState() {
-    // Méthode appelée au démarrage de l'application
     super.initState();
+    // Set up the listener for the Firestore documents
+    initBDDListener();
 
     for (int i = 0;
         i <
@@ -389,8 +412,47 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
     }
   }
 
+  void createDocumentsFromDBB(List<Document_BDD> documentsBDD) {
+    List<Document> documents = [];
+    for (int i = 0;
+        i < Provider.of<User>(context, listen: false).folderList.length;
+        i++) {}
+    for (int i = 0; i < documentsBDD.length; i++) {
+      int index = findFolderIndexWithId(documentsBDD[i].folderId);
+      Document newDoc = Document(
+        id: documentsBDD[i].id,
+        title: documentsBDD[i].title,
+        fileType: documentsBDD[i].fileType,
+        path: documentsBDD[i].path,
+        tags: documentsBDD[i].tags,
+        ownerId: documentsBDD[i].ownerId,
+        folder: Provider.of<User>(context, listen: false).folderList[index],
+      );
+      documents.add(newDoc);
+    }
+
+    Provider.of<User>(context, listen: false).folderList[indexFolder].files.clear();
+    Provider.of<User>(context, listen: false).folderList[indexFolder].files = documents;
+  }
+
+  void initBDDListener() {
+    List<Document_BDD> documentsBDD = [];
+    DatabaseService().getDocuments().listen((List<Document_BDD> docs) {
+      //createDocumentsFromDBB();
+      // Do something with the fetched documents
+      documentsBDD = docs;
+
+      // Assign the documents to a state variable that your widget will use to build the UI
+      createDocumentsFromDBB(documentsBDD);
+    }, onError: (e) {
+      // Handle any errors that occur during the fetch
+      print("Error fetching documents: $e");
+    });
+  }
+
   // Méthode pour rechercher un document
   void searchDocuments(String query, Folder folder) {
+    initBDDListener();
     List<FileSystemEntity> entity = [];
     for (int i = 0; i < folder.folders.length; i++) {
       entity.add(folder.folders[i]);
@@ -452,6 +514,7 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
     path = "/home/$path"; // Ajoute /home au début du chemin
     path = path.substring(0, path.length - 1); // Supprime le dernier /
 
+    initBDDListener();
     return path;
   }
 
@@ -535,6 +598,7 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
                     folder.parentId); // Change the current folder index
                 if (parentdIndexFolder < 0) parentdIndexFolder = 0;
                 setState(() {
+                  initBDDListener();
                   indexFolder = parentdIndexFolder;
                   filteredEntity.clear(); // Clear the list of documents
                   searchController.clear(); // Clear the search bar
@@ -592,6 +656,7 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
                                 as Folder; // Cast en Folder
 
                             setState(() {
+                              initBDDListener();
                               indexFolder = findFolderIndexWithId(
                                   folder.id); // Change the current folder index
                               filteredEntity
@@ -662,8 +727,8 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
                                     context); // Affiche la boîte de dialogue pour renommer le dossier
                               }
                               setState(() {
-                                filteredEntity
-                                    .clear(); // Clear the list of documents
+                                filteredEntity.clear(); // Clear the list of documents
+                                initBDDListener();
                                 // Add folders and files from the selected folder to filteredEntity
                                 filteredEntity.addAll(
                                     Provider.of<User>(context, listen: false)

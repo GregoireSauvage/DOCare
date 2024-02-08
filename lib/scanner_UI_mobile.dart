@@ -18,6 +18,7 @@ class DocumentScannerUI extends StatefulWidget {
 
 class _DocumentScannerUIState extends State<DocumentScannerUI> {
   String _prediction = "";
+  List _subcategoryPrediction = [];
   List<Document> _documents = [];
 
   @override
@@ -30,7 +31,6 @@ class _DocumentScannerUIState extends State<DocumentScannerUI> {
   }
 
   void _initializeDocuments() {
-    
     _documents = List.generate(
       widget.pictures.length,
       (index) => Document.simpleConstructor(
@@ -38,8 +38,7 @@ class _DocumentScannerUIState extends State<DocumentScannerUI> {
         title: 'Document $index',
         fileType: 'img',
         path: widget.pictures[index],
-        tags: [_prediction],
-        creationDate: DateTime.now(),
+        tags: [_subcategoryPrediction.toString()],
         ownerId: -1,
         folder: Provider.of<User>(context, listen: false).folderList[0],
       ),
@@ -56,9 +55,10 @@ class _DocumentScannerUIState extends State<DocumentScannerUI> {
 
   // ML model prediction result
   Future<void> classifyImage() async {
+    
     File image = File(widget.pictures[0]);
 
-    final url = Uri.parse('http://10.5.22.48:5000/predict');
+    final url = Uri.parse('http://172.20.10.2:5000/predict');
     var request = http.MultipartRequest('POST', url);
     request.files.add(await http.MultipartFile.fromPath('image', image.path));
     try {
@@ -68,7 +68,7 @@ class _DocumentScannerUIState extends State<DocumentScannerUI> {
         var decodedResponse = json.decode(jsonResponse);
         setState(() {
           _prediction = decodedResponse['predicted_class'];
-          _prediction = decodedResponse['subcategory_prediction'];
+          _subcategoryPrediction = decodedResponse['subcategory_prediction'];
           _initializeDocuments();
         });
       } else {
@@ -175,11 +175,13 @@ class _DocumentScannerUIState extends State<DocumentScannerUI> {
             right: 26.0,
             child: ElevatedButton(
               onPressed: () {
-                for(int i = 0; i < _documents.length; i++) {
-                  _documents[i].modifyOwner(Provider.of<User>(context, listen: false).userId);
-                  Provider.of<User>(context, listen: false).folderList[0].addFile(_documents[i]);
+                for (int i = 0; i < _documents.length; i++) {
+                  _documents[i].modifyOwner(
+                      Provider.of<User>(context, listen: false).userId);
+                  Provider.of<User>(context, listen: false)
+                      .folderList[0]
+                      .addFile(_documents[i]);
                 }
-
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue, // Button color

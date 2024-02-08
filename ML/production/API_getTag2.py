@@ -11,7 +11,7 @@ import keras_ocr
 app = Flask(__name__)
 
 # Chargement du modèle principal
-loaded_model = tf.keras.models.load_model('D:/projet/DOCare/DOCare/ML/production/Model_cat_etape1')
+loaded_model = tf.keras.models.load_model('D:\projet\DOCare\DOCare\ML\production\Model_cat_etape1')
 img_size = (128, 128)
 
 @app.route('/predict', methods=['POST'])
@@ -35,11 +35,11 @@ def predict():
 
     # Utilisation du modèle correspondant à la classe principale prédite pour prédire la sous-catégorie
     if predicted_class_name == "papier_identite":
-        model = joblib.load('D:/projet/DOCare/DOCare/ML/production/model_papierid.pkl')
+        model = joblib.load('D:\projet\DOCare\DOCare\ML\production\model_papierid.pkl')
     elif predicted_class_name == "PapierA4":
-        model = joblib.load('D:/projet/DOCare/DOCare/ML/production/model_papierA4.pkl')
+        model = joblib.load('D:\projet\DOCare\DOCare\ML\production\model_papierA4.pkl')
     else:
-        return jsonify({'predicted_class': 'Imagerie médicale'})
+        return jsonify({"predicted_class":"Imagerie médicale","subcategory_prediction":["Imagerie médicale"]})
 
     # Prédiction de la sous-catégorie
     pipeline = keras_ocr.pipeline.Pipeline()
@@ -51,9 +51,7 @@ def predict():
     # Supprimer l'image temporaire
     os.remove(image_path)
 
-    print('subcategory_prediction', subcategory_prediction)
     return jsonify({'predicted_class': predicted_class_name, 'subcategory_prediction': subcategory_prediction.tolist()})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=False)
-    
