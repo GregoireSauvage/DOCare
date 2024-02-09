@@ -170,7 +170,6 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
   }
 
   void refreshUI() {
-    initBDDListener();
     setState(() {
       filteredEntity.clear();
       filteredEntity.addAll(Provider.of<User>(context, listen: false)
@@ -182,6 +181,12 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
 
       // print all the documents of the user
     });
+    for(int i = 0; i < Provider.of<User>(context, listen: false).folderList.length; i++) {
+      print("DOSSIER $i : ${Provider.of<User>(context, listen: false).folderList[i].name}");
+      for(int j = 0; j < Provider.of<User>(context, listen: false).folderList[i].files.length; j++) {
+        print("fichier $j : ${Provider.of<User>(context, listen: false).folderList[i].files[j].title}");
+      }
+    }
   }
 
   void newDocument() async {
@@ -236,8 +241,7 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
           path: downloadUrl,
           tags: [],
           ownerId: 2,
-          folder: Provider.of<User>(context, listen: false)
-              .folderList[indexFolder]);
+          folder: Provider.of<User>(context, listen: false).folderList[indexFolder]);
       Document_BDD doc_bdd = Document_BDD(
           id: 2,
           title: file.name,
@@ -260,6 +264,7 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
       // Handle the case where no file is selected
       print('No file selected.');
     }
+    initBDDListener();
   }
 
   // Méthode pour construire la barre de recherche
@@ -416,7 +421,9 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
     List<Document> documents = [];
     for (int i = 0;
         i < Provider.of<User>(context, listen: false).folderList.length;
-        i++) {}
+        i++) {
+      //Provider.of<User>(context, listen: false).folderList[i].files.clear();
+        }
     for (int i = 0; i < documentsBDD.length; i++) {
       int index = findFolderIndexWithId(documentsBDD[i].folderId);
       Document newDoc = Document(
@@ -429,8 +436,9 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
         folder: Provider.of<User>(context, listen: false).folderList[index],
       );
       documents.add(newDoc);
+      
     }
-
+    documentsBDD.clear();
     Provider.of<User>(context, listen: false).folderList[indexFolder].files.clear();
     Provider.of<User>(context, listen: false).folderList[indexFolder].files = documents;
   }
@@ -452,7 +460,6 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
 
   // Méthode pour rechercher un document
   void searchDocuments(String query, Folder folder) {
-    initBDDListener();
     List<FileSystemEntity> entity = [];
     for (int i = 0; i < folder.folders.length; i++) {
       entity.add(folder.folders[i]);
@@ -514,7 +521,6 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
     path = "/home/$path"; // Ajoute /home au début du chemin
     path = path.substring(0, path.length - 1); // Supprime le dernier /
 
-    initBDDListener();
     return path;
   }
 
@@ -598,7 +604,6 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
                     folder.parentId); // Change the current folder index
                 if (parentdIndexFolder < 0) parentdIndexFolder = 0;
                 setState(() {
-                  initBDDListener();
                   indexFolder = parentdIndexFolder;
                   filteredEntity.clear(); // Clear the list of documents
                   searchController.clear(); // Clear the search bar
@@ -656,7 +661,6 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
                                 as Folder; // Cast en Folder
 
                             setState(() {
-                              initBDDListener();
                               indexFolder = findFolderIndexWithId(
                                   folder.id); // Change the current folder index
                               filteredEntity
@@ -728,7 +732,6 @@ class _DocumentInterfaceState extends State<DocumentInterface> {
                               }
                               setState(() {
                                 filteredEntity.clear(); // Clear the list of documents
-                                initBDDListener();
                                 // Add folders and files from the selected folder to filteredEntity
                                 filteredEntity.addAll(
                                     Provider.of<User>(context, listen: false)
