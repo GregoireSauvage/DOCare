@@ -58,7 +58,7 @@ class _DocumentScannerUIState extends State<DocumentScannerUI> {
     
     File image = File(widget.pictures[0]);
 
-    final url = Uri.parse('http://192.168.1.15:5000/predict');
+    final url = Uri.parse('http://192.162.1.14:5000/predict');
     var request = http.MultipartRequest('POST', url);
     request.files.add(await http.MultipartFile.fromPath('image', image.path));
     try {
