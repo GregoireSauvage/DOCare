@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:docare/main.dart';
 import 'package:provider/provider.dart';
-import 'package:docare/user.dart';
+import 'package:docare/core/models/user.dart';
 
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {

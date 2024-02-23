@@ -1,29 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:docare/user.dart';
-import 'package:docare/document.dart';
-import 'package:docare/doc_mobile.dart' // par defaut charge la version mobile
-    if (dart.library.html) 'package:docare/doc_web.dart'; // sinon charge la version web
+import 'package:docare/core/models/user.dart';
+import 'package:docare/features/document/document.dart';
+import 'package:docare/features/document/widgets/doc_mobile.dart' // par defaut charge la version mobile
+    if (dart.library.html) 'package:docare/features/document/widgets/doc_web.dart'; // sinon charge la version web
 
-import 'package:docare/demarche_mobile.dart'
-    if (dart.library.html) 'package:docare/demarche_web.dart';
+import 'package:docare/features/demarches/widgets/demarche_mobile.dart'
+    if (dart.library.html) 'package:docare/features/demarches/widgets/demarche_web.dart';
 
 import 'package:provider/provider.dart'; // Pour utiliser le provider
-import 'package:docare/user.dart'; // Pour utiliser la classe User
-import 'package:docare/document.dart'; // Pour utiliser la classe Document
-import 'package:docare/folder.dart'; // Pour utiliser la classe Folder
-import 'package:docare/demarche.dart'; // Pour utiliser la classe Demarche
+import 'package:docare/core/models/user.dart'; // Pour utiliser la classe User
+import 'package:docare/features/document/document.dart'; // Pour utiliser la classe Document
+import 'package:docare/core/models/folder.dart'; // Pour utiliser la classe Folder
+import 'package:docare/features/demarches/demarche.dart'; // Pour utiliser la classe Demarche
 
-import 'package:docare/context_menu_mobile.dart' // Charge la version mobile (dummy)
-    if (dart.library.html) 'package:docare/context_menu.dart'; // Pour utiliser la classe MenuActions
+import 'package:docare/core/utils/context_menu_mobile.dart' // Charge la version mobile (dummy)
+    if (dart.library.html) 'package:docare/core/utils/context_menu.dart'; // Pour utiliser la classe MenuActions
 import 'package:file_picker/file_picker.dart'; // Pour sélectionner un fichier
 import 'dart:typed_data'; // Pour convertir un fichier en bytes
 import 'package:cunning_document_scanner/cunning_document_scanner.dart'; // Pour scanner un document
 import 'package:flutter/foundation.dart';
 import 'package:docare/scanner_UI_mobile.dart'; // Charge la version mobile (dummy)
 
-import 'package:docare/font_size.dart'; // Pour utiliser la classe FontSizeSettings
-import 'package:docare/firebase_options.dart';
+import 'package:docare/core/utils/font_size.dart'; // Pour utiliser la classe FontSizeSettings
+import 'package:docare/core/services/firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 

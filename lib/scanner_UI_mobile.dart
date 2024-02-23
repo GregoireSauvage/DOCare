@@ -1,11 +1,11 @@
 import 'dart:io';
-import 'package:docare/document.dart';
+import 'package:docare/features/document/document.dart';
 import 'package:flutter/material.dart';
 import 'package:cunning_document_scanner/cunning_document_scanner.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
-import 'package:docare/user.dart';
+import 'package:docare/core/models/user.dart';
 
 class DocumentScannerUI extends StatefulWidget {
   final List<String> pictures;
